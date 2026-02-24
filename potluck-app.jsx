@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from "react";
+import homeBg from "./src/homebackground.png";
 
 // ── Food emoji mapping ────────────────────────────────────────────────────────
 const getFoodEmoji = (itemName) => {
@@ -71,28 +72,28 @@ const getEventRecommendations = (eventName, mealType) => {
   const name = (eventName || "").toLowerCase();
   const meal = (mealType || "").toLowerCase();
   const contextMap = [
-    { keys: ["bbq", "barbecue", "grill", "cookout"],      items: ["🥩 Grilled Ribs", "🌽 Corn on the Cob", "🥗 Coleslaw", "🍔 Burgers", "🌭 Hot Dogs", "🥔 Baked Potatoes", "🥤 Lemonade"] },
-    { keys: ["birthday", "bday", "celebration", "party"], items: ["🎂 Birthday Cake", "🍕 Pizza", "🥤 Punch Bowl", "🍟 Fries", "🍪 Cookies", "🧁 Cupcakes", "🍿 Popcorn"] },
-    { keys: ["christmas", "holiday", "xmas", "festive"],  items: ["🍖 Roast Turkey", "🥔 Mashed Potatoes", "🥧 Pumpkin Pie", "🍪 Sugar Cookies", "🥦 Green Bean Casserole", "🍞 Dinner Rolls", "🍷 Mulled Wine"] },
-    { keys: ["thanksgiving", "harvest", "fall"],           items: ["🦃 Turkey", "🥔 Mashed Potatoes", "🥧 Pumpkin Pie", "🫘 Green Bean Casserole", "🍞 Cornbread", "🍎 Apple Cider", "🌽 Corn Pudding"] },
-    { keys: ["halloween", "spooky", "trick", "treat"],    items: ["🎃 Pumpkin Soup", "🍫 Chocolate Treats", "🍎 Caramel Apples", "🧁 Spooky Cupcakes", "🥤 Witches Brew Punch", "🌽 Candy Corn Cookies"] },
-    { keys: ["summer", "picnic", "outdoor", "garden"],    items: ["🥗 Garden Salad", "🍉 Watermelon", "🥪 Sandwiches", "🍋 Lemonade", "🫐 Fruit Salad", "🥨 Chips & Dip", "🍦 Ice Cream"] },
-    { keys: ["taco", "mexican", "fiesta", "cinco"],       items: ["🌮 Tacos", "🥑 Guacamole", "🌯 Burritos", "🍅 Salsa", "🧀 Queso Dip", "🍚 Spanish Rice", "🫘 Refried Beans"] },
-    { keys: ["italian", "pasta", "pizza night"],          items: ["🍝 Spaghetti", "🍕 Margherita Pizza", "🥗 Caesar Salad", "🍞 Garlic Bread", "🍷 Chianti", "🧁 Cannoli"] },
-    { keys: ["asian", "chinese", "japanese", "sushi", "korean"], items: ["🍱 Sushi Rolls", "🥟 Dumplings", "🍜 Ramen", "🍛 Fried Rice", "🥢 Kimchi", "🍡 Mochi", "🥤 Green Tea"] },
-    { keys: ["game", "super bowl", "sports", "watch"],   items: ["🍕 Pizza", "🥤 Sodas", "🍟 Nachos", "🌭 Hot Dogs", "🥜 Peanuts", "🍗 Buffalo Wings", "🧀 Cheese Dip"] },
-    { keys: ["brunch", "mimosa"],                         items: ["🧇 Waffles", "🥞 Pancakes", "🥚 Deviled Eggs", "🥐 Croissants", "🍓 Fruit Salad", "🍊 Mimosas", "☕ Coffee"] },
-    { keys: ["vegan", "vegetarian", "plant", "healthy"],  items: ["🥗 Mixed Green Salad", "🥑 Avocado Toast", "🫘 Lentil Soup", "🥦 Roasted Veggies", "🥜 Hummus & Pita", "🍅 Stuffed Tomatoes", "🧁 Vegan Brownies"] },
-    { keys: ["seafood", "fish", "clambake", "lobster"],   items: ["🦞 Lobster Rolls", "🐟 Grilled Salmon", "🍤 Shrimp Cocktail", "🦀 Crab Cakes", "🥗 Coleslaw", "🍞 Sourdough Bread"] },
-    { keys: ["dessert", "sweet", "candy", "chocolate"],   items: ["🍰 Layer Cake", "🍪 Cookies", "🍩 Donuts", "🍫 Brownies", "🧁 Cupcakes", "🍦 Ice Cream", "🥧 Pie"] },
-    { keys: ["potluck", "community", "neighborhood"],     items: ["🥗 Pasta Salad", "🍗 Fried Chicken", "🥔 Potato Salad", "🍞 Dinner Rolls", "🍰 Sheet Cake", "🥤 Sweet Tea", "🫘 Baked Beans"] },
+    { keys: ["bbq", "barbecue", "grill", "cookout"],      items: ["Grilled Ribs", "Corn on the Cob", "Coleslaw", "Burgers", "Hot Dogs", "Baked Potatoes", "Lemonade"] },
+    { keys: ["birthday", "bday", "celebration", "party"], items: ["Birthday Cake", "Pizza", "Punch Bowl", "Fries", "Cookies", "Cupcakes", "Popcorn"] },
+    { keys: ["christmas", "holiday", "xmas", "festive"],  items: ["Roast Turkey", "Mashed Potatoes", "Pumpkin Pie", "Sugar Cookies", "Green Bean Casserole", "Dinner Rolls", "Mulled Wine"] },
+    { keys: ["thanksgiving", "harvest", "fall"],           items: ["Turkey", "Mashed Potatoes", "Pumpkin Pie", "Green Bean Casserole", "Cornbread", "Apple Cider", "Corn Pudding"] },
+    { keys: ["halloween", "spooky", "trick", "treat"],    items: ["Pumpkin Soup", "Chocolate Treats", "Caramel Apples", "Spooky Cupcakes", "Witches Brew Punch", "Candy Corn Cookies"] },
+    { keys: ["summer", "picnic", "outdoor", "garden"],    items: ["Garden Salad", "Watermelon", "Sandwiches", "Lemonade", "Fruit Salad", "Chips & Dip", "Ice Cream"] },
+    { keys: ["taco", "mexican", "fiesta", "cinco"],       items: ["Tacos", "Guacamole", "Burritos", "Salsa", "Queso Dip", "Spanish Rice", "Refried Beans"] },
+    { keys: ["italian", "pasta", "pizza night"],          items: ["Spaghetti", "Margherita Pizza", "Caesar Salad", "Garlic Bread", "Chianti", "Cannoli"] },
+    { keys: ["asian", "chinese", "japanese", "sushi", "korean"], items: ["Sushi Rolls", "Dumplings", "Ramen", "Fried Rice", "Kimchi", "Mochi", "Green Tea"] },
+    { keys: ["game", "super bowl", "sports", "watch"],   items: ["Pizza", "Sodas", "Nachos", "Hot Dogs", "Peanuts", "Buffalo Wings", "Cheese Dip"] },
+    { keys: ["brunch", "mimosa"],                         items: ["Waffles", "Pancakes", "Deviled Eggs", "Croissants", "Fruit Salad", "Mimosas", "Coffee"] },
+    { keys: ["vegan", "vegetarian", "plant", "healthy"],  items: ["Mixed Green Salad", "Avocado Toast", "Lentil Soup", "Roasted Veggies", "Hummus & Pita", "Stuffed Tomatoes", "Vegan Brownies"] },
+    { keys: ["seafood", "fish", "clambake", "lobster"],   items: ["Lobster Rolls", "Grilled Salmon", "Shrimp Cocktail", "Crab Cakes", "Coleslaw", "Sourdough Bread"] },
+    { keys: ["dessert", "sweet", "candy", "chocolate"],   items: ["Layer Cake", "Cookies", "Donuts", "Brownies", "Cupcakes", "Ice Cream", "Pie"] },
+    { keys: ["potluck", "community", "neighborhood"],     items: ["Pasta Salad", "Fried Chicken", "Potato Salad", "Dinner Rolls", "Sheet Cake", "Sweet Tea", "Baked Beans"] },
   ];
   const mealDefaults = {
-    breakfast: ["🥞 Pancakes", "🥚 Scrambled Eggs", "🥓 Bacon", "☕ Coffee", "🍊 Orange Juice", "🧇 Waffles", "🍞 Toast"],
-    brunch:    ["🥞 French Toast", "🥚 Quiche", "🥐 Croissants", "🍓 Fruit Salad", "🍊 Mimosas", "☕ Coffee", "🧁 Muffins"],
-    lunch:     ["🥗 Garden Salad", "🥪 Sandwiches", "🍝 Pasta Salad", "🍕 Pizza Slices", "🥤 Iced Tea", "🍞 Rolls", "🍎 Fresh Fruit"],
-    dinner:    ["🥗 Green Salad", "🍗 Roasted Chicken", "🥔 Mashed Potatoes", "🥦 Steamed Veggies", "🍞 Dinner Rolls", "🍷 Wine", "🍰 Dessert"],
-    supper:    ["🍲 Casserole", "🥗 Side Salad", "🍞 Cornbread", "🥧 Pie", "🥤 Sweet Tea", "🫘 Baked Beans", "🍗 Fried Chicken"],
+    breakfast: ["Pancakes", "Scrambled Eggs", "Bacon", "Coffee", "Orange Juice", "Waffles", "Toast"],
+    brunch:    ["French Toast", "Quiche", "Croissants", "Fruit Salad", "Mimosas", "Coffee", "Muffins"],
+    lunch:     ["Garden Salad", "Sandwiches", "Pasta Salad", "Pizza Slices", "Iced Tea", "Rolls", "Fresh Fruit"],
+    dinner:    ["Green Salad", "Roasted Chicken", "Mashed Potatoes", "Steamed Veggies", "Dinner Rolls", "Wine", "Dessert"],
+    supper:    ["Casserole", "Side Salad", "Cornbread", "Pie", "Sweet Tea", "Baked Beans", "Fried Chicken"],
   };
   for (const { keys, items } of contextMap) {
     if (keys.some((k) => name.includes(k))) return items;
@@ -203,29 +204,29 @@ const TIME_OPTIONS = (() => {
 const generateId = () => Math.random().toString(36).substr(2, 9);
 const EVENTS_KEY   = "potluckpal_events_v2";
 const USER_MAP_KEY = "potluckpal_usermap_v2";
-async function loadData(key) {
-  try { const r = await window.storage.get(key); return r ? JSON.parse(r.value) : {}; } catch { return {}; }
+function loadData(key) {
+  try { const r = localStorage.getItem(key); return r ? JSON.parse(r) : {}; } catch { return {}; }
 }
-async function saveData(key, data) {
-  try { await window.storage.set(key, JSON.stringify(data)); } catch {}
+function saveData(key, data) {
+  try { localStorage.setItem(key, JSON.stringify(data)); } catch {}
 }
 
 // ── Shared UI ─────────────────────────────────────────────────────────────────
-const fieldBase = { width: "100%", padding: "0.6rem 0.9rem", borderRadius: 10, border: "1.5px solid #ffccbc", fontFamily: "'Nunito', sans-serif", fontSize: "0.95rem", outline: "none", background: "rgba(255,248,244,0.9)", color: "#4e342e", boxSizing: "border-box" };
+const fieldBase = { width: "100%", padding: "0.6rem 0.9rem", borderRadius: 8, border: "1.5px solid #e0f2f1", fontFamily: "'Nunito', sans-serif", fontSize: "0.95rem", outline: "none", background: "rgba(255,255,255,0.9)", color: "#5d4e37", boxSizing: "border-box" };
 
 function Blob({ style }) { return <div style={{ position: "absolute", borderRadius: "50%", filter: "blur(60px)", opacity: 0.18, pointerEvents: "none", ...style }} />; }
 
 function Card({ children, style }) {
-  return <div style={{ background: "rgba(255,255,255,0.85)", backdropFilter: "blur(18px)", borderRadius: 24, border: "1.5px solid rgba(255,255,255,0.6)", boxShadow: "0 8px 40px rgba(120,80,40,0.10)", padding: "2rem", ...style }}>{children}</div>;
+  return <div style={{ background: "rgba(255,255,255,0.9)", backdropFilter: "blur(12px)", borderRadius: 16, border: "1.5px solid rgba(224,242,241,0.5)", boxShadow: "0 4px 20px rgba(93,78,55,0.15)", padding: "2rem", ...style }}>{children}</div>;
 }
 
 function Button({ children, onClick, variant = "primary", style, disabled }) {
   const v = {
-    primary:   { background: "linear-gradient(135deg,#ff7043,#ff8f00)", color: "#fff", boxShadow: "0 4px 18px rgba(255,112,67,0.35)" },
-    secondary: { background: "rgba(255,112,67,0.1)", color: "#e65100" },
-    ghost:     { background: "transparent", color: "#8d6e63" },
-    green:     { background: "linear-gradient(135deg,#43a047,#66bb6a)", color: "#fff", boxShadow: "0 4px 18px rgba(67,160,71,0.30)" },
-    danger:    { background: "rgba(211,47,47,0.10)", color: "#c62828" },
+    primary:   { background: "linear-gradient(135deg,#8d6e63,#a1887f)", color: "#fff", boxShadow: "0 4px 18px rgba(141,110,99,0.35)" },
+    secondary: { background: "rgba(141,110,99,0.1)", color: "#5d4e37" },
+    ghost:     { background: "transparent", color: "#5d4e37" },
+    green:     { background: "linear-gradient(135deg,#6b8e23,#9ccc65)", color: "#fff", boxShadow: "0 4px 18px rgba(107,142,35,0.30)" },
+    danger:    { background: "rgba(139,69,19,0.10)", color: "#8d4a2b" },
   };
   return (
     <button onClick={onClick} disabled={disabled}
@@ -275,28 +276,30 @@ function HomeScreen({ onCreateEvent, onJoinEvent, onViewHistory }) {
   const [code, setCode]         = useState("");
   const [histName, setHistName] = useState("");
   return (
-    <div style={{ maxWidth: 480, margin: "0 auto", paddingTop: "2rem" }}>
+    <div style={{ maxWidth: 1200, margin: "0 auto", paddingTop: "2rem", paddingBottom: "3rem", paddingLeft: "1rem", paddingRight: "1rem", display: "flex", flexDirection: "column", gap: "1rem", justifyContent: "center", backgroundImage: `linear-gradient(rgba(255,245,235,0.55), rgba(255,245,235,0.55)), url(${homeBg})`, backgroundSize: "cover", backgroundPosition: "center", backgroundRepeat: "no-repeat", borderRadius: "20px", position: "relative" }}>
       <div style={{ textAlign: "center", marginBottom: "2.5rem" }}>
-        <div style={{ fontSize: "4rem", marginBottom: "0.4rem" }}>🤝</div>
-        <h1 style={{ fontFamily: "'Fredoka One', cursive", fontSize: "2.8rem", color: "#bf360c", margin: 0, lineHeight: 1.1, textShadow: "2px 2px 0 rgba(255,200,150,0.5)" }}>Potluck Pal</h1>
-        <p style={{ fontFamily: "'Nunito', sans-serif", color: "#8d6e63", marginTop: 8, fontSize: "1.05rem" }}>Bring something delicious, share something wonderful 🎉</p>
+        <div style={{ fontSize: "4rem", marginBottom: "0.4rem" }}>🥟</div>
+        <h1 style={{ fontFamily: "'Fredoka One', cursive", fontSize: "6.5rem", color: "#ff6a00", margin: 0, lineHeight: 1.1, fontWeight: "900", textShadow: "3px 3px 0 #fff, 6px 6px 0 rgba(255,150,0,0.35), 0 0 40px rgba(255,120,0,0.5)" }}>Potluck Pal</h1>
+        <p style={{ fontFamily: "'Nunito', sans-serif", fontStyle: "italic", color: "#3e2000", marginTop: 8, fontSize: "1.1rem", display: "inline-block", background: "rgba(255,245,220,0.72)", borderRadius: 20, padding: "4px 18px" }}>Bring something delicious, share something wonderful 🎉</p>
       </div>
-      <Card style={{ marginBottom: "1.2rem" }}>
-        <h2 style={{ fontFamily: "'Fredoka One', cursive", color: "#e64a19", marginTop: 0, fontSize: "1.4rem" }}>🎊 Host a Potluck</h2>
+      <div style={{ display: "flex", flexDirection: "row", gap: "1rem", flexWrap: "wrap", justifyContent: "center" }}>
+        <Card style={{ flex: "1 1 300px", maxWidth: "400px" }}>
+          <h2 style={{ fontFamily: "'Fredoka One', cursive", fontStyle: "italic", color: "#d84315", marginTop: 0, fontSize: "1.4rem" }}>🎊 Host a Potluck</h2>
         <Input value={name} onChange={setName} placeholder="Your name, e.g. Grandma Sue" required />
         <Button onClick={() => name.trim() && onCreateEvent(name.trim())} disabled={!name.trim()} style={{ width: "100%" }}>🎊 Create a New Event</Button>
       </Card>
-      <Card style={{ marginBottom: "1.2rem" }}>
-        <h2 style={{ fontFamily: "'Fredoka One', cursive", color: "#e64a19", marginTop: 0, fontSize: "1.4rem" }}>🔗 Join an Existing Event</h2>
+      <Card style={{ flex: "1 1 300px", maxWidth: "400px" }}>
+        <h2 style={{ fontFamily: "'Fredoka One', cursive", fontStyle: "italic", color: "#d84315", marginTop: 0, fontSize: "1.4rem" }}>🔗 Join an Existing Event</h2>
         <Input value={joinName} onChange={setJoinName} placeholder="Your name..." required />
         <Input value={code} onChange={setCode} placeholder="Paste event ID or share link..." />
         <Button onClick={() => { if (!joinName.trim() || !code.trim()) return; const m = code.match(/event=([a-z0-9]+)/); onJoinEvent(m ? m[1] : code.trim(), joinName.trim()); }} disabled={!joinName.trim() || !code.trim()} variant="secondary" style={{ width: "100%" }}>🚪 Join Event</Button>
       </Card>
-      <Card>
-        <h2 style={{ fontFamily: "'Fredoka One', cursive", color: "#e64a19", marginTop: 0, fontSize: "1.4rem" }}>📖 My Past Events</h2>
+      <Card style={{ flex: "1 1 300px", maxWidth: "400px" }}>
+        <h2 style={{ fontFamily: "'Fredoka One', cursive", fontStyle: "italic", color: "#d84315", marginTop: 0, fontSize: "1.4rem" }}>📖 My Past Events</h2>
         <Input value={histName} onChange={setHistName} placeholder="Enter your name to look up events..." />
-        <Button onClick={() => histName.trim() && onViewHistory(histName.trim())} disabled={!histName.trim()} variant="ghost" style={{ width: "100%", border: "1.5px solid #ffccbc" }}>🔍 Look Up My Events</Button>
+        <Button onClick={() => histName.trim() && onViewHistory(histName.trim())} disabled={!histName.trim()} variant="ghost" style={{ width: "100%", border: "1.5px solid #e0f2f1" }}>🔍 Look Up My Events</Button>
       </Card>
+      </div>
     </div>
   );
 }
@@ -310,21 +313,21 @@ function HistoryScreen({ userName, events, userMap, onDelete, onOpen, onBack }) 
     <div style={{ maxWidth: 560, margin: "0 auto", paddingTop: "1.5rem" }}>
       <Button variant="ghost" onClick={onBack} style={{ marginBottom: "0.8rem" }}>← Back</Button>
       <Card>
-        <h2 style={{ fontFamily: "'Fredoka One', cursive", color: "#e64a19", marginTop: 0, fontSize: "1.6rem" }}>📖 {userName}'s Events</h2>
+        <h2 style={{ fontFamily: "'Fredoka One', cursive", fontStyle: "italic", color: "#5d4e37", marginTop: 0, fontSize: "1.6rem" }}>📖 {userName}'s Events</h2>
         {myEvents.length === 0 ? (
-          <p style={{ fontFamily: "'Nunito', sans-serif", color: "#bcaaa4", textAlign: "center", padding: "1.5rem 0" }}>No events found for <strong>{userName}</strong>.<br /><span style={{ fontSize: "0.85rem" }}>Events link to you when you create them or add a dish.</span></p>
+          <p style={{ fontFamily: "'Nunito', sans-serif", fontStyle: "italic", color: "#a8caba", textAlign: "center", padding: "1.5rem 0" }}>No events found for <strong>{userName}</strong>.<br /><span style={{ fontSize: "0.85rem" }}>Events link to you when you create them or add a dish.</span></p>
         ) : (
           <div style={{ display: "flex", flexDirection: "column", gap: "0.8rem" }}>
             {myEvents.map((ev) => {
               const theme = getTableTheme(ev.name, ev.mealType);
               const mealLabel = MEAL_TYPES.find((m) => m.value === ev.mealType)?.label || ev.mealType || "";
               return (
-                <div key={ev.id} style={{ background: "rgba(255,248,244,0.85)", borderRadius: 14, border: "1px solid #ffe0b2", padding: "0.9rem 1.1rem", display: "flex", alignItems: "center", gap: "0.8rem", flexWrap: "wrap" }}>
+                <div key={ev.id} style={{ background: "rgba(245,245,220,0.85)", borderRadius: 14, border: "1px solid #a8caba", padding: "0.9rem 1.1rem", display: "flex", alignItems: "center", gap: "0.8rem", flexWrap: "wrap" }}>
                   <div style={{ width: 36, height: 36, borderRadius: "50%", background: theme.bg, border: `3px solid ${theme.ring}`, flexShrink: 0, boxShadow: `0 0 10px ${theme.glow}` }} />
                   <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ fontFamily: "'Fredoka One', cursive", color: "#bf360c", fontSize: "1.05rem" }}>{ev.name}</div>
-                    <div style={{ fontFamily: "'Nunito', sans-serif", color: "#8d6e63", fontSize: "0.82rem", marginTop: 2 }}>{mealLabel} · {fmtDate(ev.date)} · {ev.location}</div>
-                    <div style={{ fontFamily: "'Nunito', sans-serif", color: "#bcaaa4", fontSize: "0.78rem" }}>{(ev.items || []).length} dish(es) · {ev.attendees} guests</div>
+                    <div style={{ fontFamily: "'Fredoka One', cursive", fontStyle: "italic", color: "#5d4e37", fontSize: "1.05rem" }}>{ev.name}</div>
+                    <div style={{ fontFamily: "'Nunito', sans-serif", fontStyle: "italic", color: "#5d4e37", fontSize: "0.82rem", marginTop: 2 }}>{mealLabel} · {fmtDate(ev.date)} · {ev.location}</div>
+                    <div style={{ fontFamily: "'Nunito', sans-serif", fontStyle: "italic", color: "#a8caba", fontSize: "0.78rem" }}>{(ev.items || []).length} dish(es) · {ev.attendees} guests</div>
                   </div>
                   <div style={{ display: "flex", gap: "0.4rem", flexShrink: 0 }}>
                     <Button variant="secondary" onClick={() => onOpen(ev.id)} style={{ padding: "0.4rem 0.85rem", fontSize: "0.85rem" }}>Open</Button>
@@ -352,8 +355,8 @@ function CreateEventScreen({ userName, onCreate, onBack }) {
     <div style={{ maxWidth: 560, margin: "0 auto", paddingTop: "1.5rem" }}>
       <Button variant="ghost" onClick={onBack} style={{ marginBottom: "1rem" }}>← Back</Button>
       <Card>
-        <h2 style={{ fontFamily: "'Fredoka One', cursive", color: "#e64a19", marginTop: 0, fontSize: "1.6rem" }}>🎉 Create Your Potluck</h2>
-        <p style={{ fontFamily: "'Nunito', sans-serif", color: "#8d6e63", marginTop: -8, marginBottom: "1.2rem" }}>Hi <strong>{userName}</strong>! Fill in the details below.</p>
+        <h2 style={{ fontFamily: "'Fredoka One', cursive", fontStyle: "italic", color: "#5d4e37", marginTop: 0, fontSize: "1.6rem" }}>🎉 Create Your Potluck</h2>
+        <p style={{ fontFamily: "'Nunito', sans-serif", fontStyle: "italic", color: "#5d4e37", marginTop: -8, marginBottom: "1.2rem" }}>Hi <strong>{userName}</strong>! Fill in the details below.</p>
         <Input label="Event Name" value={form.name} onChange={set("name")} placeholder="e.g. Summer BBQ Bash" required />
         <Select label="Meal Type" value={form.mealType} onChange={set("mealType")} options={MEAL_TYPES} required placeholder="— Choose meal type —" />
         <Input label="Date" value={form.date} onChange={set("date")} type="date" required />
@@ -367,7 +370,7 @@ function CreateEventScreen({ userName, onCreate, onBack }) {
               <span style={{ fontFamily: "'Fredoka One', cursive", color: theme.label, fontSize: "0.9rem" }}>✨ Suggested dishes for your event</span>
             </div>
             <div style={{ background: "rgba(255,252,248,0.97)", padding: "0.7rem 1rem", display: "flex", flexWrap: "wrap", gap: "0.35rem" }}>
-              {recs.map((r, i) => <span key={i} style={{ fontFamily: "'Nunito', sans-serif", fontSize: "0.8rem", background: "rgba(255,240,220,0.9)", border: "1px solid #ffe0b2", borderRadius: 20, padding: "3px 10px", color: "#5d4037" }}>{r}</span>)}
+              {recs.map((r, i) => <span key={i} style={{ fontFamily: "'Nunito', sans-serif", fontSize: "0.8rem", background: "rgba(255,240,220,0.9)", border: "1px solid #ffe0b2", borderRadius: 20, padding: "3px 10px", color: "#5d4037" }}>{getFoodEmoji(r)} {r}</span>)}
             </div>
           </div>
         )}
@@ -503,11 +506,11 @@ function EventScreen({ event, userName, onAddItem, onBack }) {
       <Card style={{ marginBottom: "1.2rem" }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: "0.5rem" }}>
           <div>
-            <h2 style={{ fontFamily: "'Fredoka One', cursive", color: "#bf360c", marginTop: 0, fontSize: "1.8rem" }}>🎊 {event.name}</h2>
-            {mealLabel && <p style={{ fontFamily: "'Nunito', sans-serif", color: "#6d4c41", margin: "4px 0", fontSize: "0.92rem" }}>🍴 {mealLabel}</p>}
-            <p style={{ fontFamily: "'Nunito', sans-serif", color: "#6d4c41", margin: "4px 0", fontSize: "0.92rem" }}>📅 {fmtDate(event.date)} at {fmtTime(event.time)}</p>
-            <p style={{ fontFamily: "'Nunito', sans-serif", color: "#6d4c41", margin: "4px 0", fontSize: "0.92rem" }}>📍 {event.location}</p>
-            <p style={{ fontFamily: "'Nunito', sans-serif", color: "#6d4c41", margin: "4px 0", fontSize: "0.92rem" }}>👥 {event.attendees} guests</p>
+            <h2 style={{ fontFamily: "'Fredoka One', cursive", fontStyle: "italic", color: "#5d4e37", marginTop: 0, fontSize: "1.8rem" }}>🎊 {event.name}</h2>
+            {mealLabel && <p style={{ fontFamily: "'Nunito', sans-serif", fontStyle: "italic", color: "#5d4e37", margin: "4px 0", fontSize: "0.92rem" }}>🍴 {mealLabel}</p>}
+            <p style={{ fontFamily: "'Nunito', sans-serif", fontStyle: "italic", color: "#5d4e37", margin: "4px 0", fontSize: "0.92rem" }}>📅 {fmtDate(event.date)} at {fmtTime(event.time)}</p>
+            <p style={{ fontFamily: "'Nunito', sans-serif", fontStyle: "italic", color: "#5d4e37", margin: "4px 0", fontSize: "0.92rem" }}>📍 {event.location}</p>
+            <p style={{ fontFamily: "'Nunito', sans-serif", fontStyle: "italic", color: "#5d4e37", margin: "4px 0", fontSize: "0.92rem" }}>👥 {event.attendees} guests</p>
           </div>
 
           {/* Share panel */}
@@ -517,7 +520,7 @@ function EventScreen({ event, userName, onAddItem, onBack }) {
             </Button>
             {shareOpen && (
               <div style={{ background: "rgba(255,250,245,0.98)", border: `2px solid ${theme.ring}`, borderRadius: 16, padding: "0.85rem 1rem", boxShadow: `0 6px 28px ${theme.glow}`, minWidth: 260, maxWidth: 360, animation: "popIn 0.25s cubic-bezier(0.34,1.56,0.64,1)" }}>
-                <p style={{ fontFamily: "'Fredoka One', cursive", color: "#5d4037", fontSize: "0.88rem", margin: "0 0 0.5rem" }}>🔗 Share with your guests:</p>
+                <p style={{ fontFamily: "'Fredoka One', cursive", fontStyle: "italic", color: "#5d4e37", fontSize: "0.88rem", margin: "0 0 0.5rem" }}>🔗 Share with your guests:</p>
                 <div style={{ background: "rgba(255,255,255,0.95)", border: "1.5px solid #ffccbc", borderRadius: 10, padding: "0.45rem 0.7rem", display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "0.5rem" }}>
                   <span style={{ fontFamily: "monospace", fontSize: "0.72rem", color: "#5d4037", flex: 1, overflowX: "auto", whiteSpace: "nowrap", userSelect: "all", lineHeight: 1.4 }}>
                     {shareUrl}
@@ -550,13 +553,20 @@ export default function App() {
   const [userName, setUserName]             = useState("");
   const [historyUser, setHistoryUser]       = useState("");
   const [loading, setLoading]               = useState(true);
+  const [scrollY, setScrollY]               = useState(0);
 
   useEffect(() => {
-    Promise.all([loadData(EVENTS_KEY), loadData(USER_MAP_KEY)]).then(([ev, um]) => {
-      setEvents(ev); setUserMap(um); setLoading(false);
-      const eid = new URLSearchParams(window.location.search).get("event");
-      if (eid && ev[eid]) { setCurrentEventId(eid); setScreen("event-join"); }
-    });
+    const ev = loadData(EVENTS_KEY);
+    const um = loadData(USER_MAP_KEY);
+    setEvents(ev); setUserMap(um); setLoading(false);
+    const eid = new URLSearchParams(window.location.search).get("event");
+    if (eid && ev[eid]) { setCurrentEventId(eid); setScreen("event-join"); }
+  }, []);
+
+  useEffect(() => {
+    const handleScroll = () => setScrollY(window.scrollY);
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
   const persistEvents  = useCallback((ne) => { setEvents(ne);  saveData(EVENTS_KEY, ne);   }, []);
@@ -597,7 +607,7 @@ export default function App() {
     persistUserMap(updatedMap);
   }, [events, userMap, persistEvents, persistUserMap]);
 
-  if (loading) return <div style={{ textAlign: "center", paddingTop: "5rem", fontFamily: "'Fredoka One', cursive", color: "#e64a19", fontSize: "1.5rem" }}>🤝 Loading Potluck Pal...</div>;
+  if (loading) return <div style={{ textAlign: "center", paddingTop: "5rem", fontFamily: "'Fredoka One', cursive", color: "#5d4e37", fontSize: "2rem" }}>🤝 Loading Potluck Pal...</div>;
 
   return (
     <>
@@ -614,16 +624,16 @@ export default function App() {
         @keyframes popIn       { from{transform:scale(0)rotate(-15deg);opacity:0} to{transform:scale(1)rotate(0);opacity:1} }
         select option { font-family: 'Nunito', sans-serif; }
       `}</style>
-      <div style={{ minHeight: "100vh", background: "linear-gradient(135deg,#fff3e0 0%,#fce4ec 50%,#fff8e1 100%)", position: "relative", overflow: "hidden" }}>
-        <Blob style={{ width: 400, height: 400, background: "#ff7043", top: -100, left: -150 }} />
-        <Blob style={{ width: 350, height: 350, background: "#ffd54f", bottom: -80, right: -100 }} />
-        <Blob style={{ width: 250, height: 250, background: "#ef9a9a", top: "40%", right: "10%" }} />
-        <div style={{ background: "rgba(255,255,255,0.7)", backdropFilter: "blur(12px)", borderBottom: "1.5px solid rgba(255,200,150,0.4)", padding: "0.8rem 2rem", display: "flex", alignItems: "center", gap: "0.5rem" }}>
-          <span style={{ fontSize: "1.6rem" }}>🤝</span>
-          <span style={{ fontFamily: "'Fredoka One', cursive", color: "#bf360c", fontSize: "1.4rem" }}>Potluck Pal</span>
-          {userName && <span style={{ fontFamily: "'Nunito', sans-serif", color: "#8d6e63", fontSize: "0.85rem", marginLeft: "auto" }}>Hi, {userName}! 👋</span>}
-        </div>
-        <div style={{ padding: "1rem 1.5rem 3rem" }}>
+      <div style={{ minHeight: "100vh", background: "linear-gradient(135deg, #fce4ec 0%, #f3e5f5 50%, #e0f2f1 100%)", position: "relative", overflow: "hidden" }}>
+        <Blob style={{ width: 250, height: 250, background: "#fce4ec", top: -100, left: -150, opacity: 0.3, transform: `translateY(${scrollY * 0.1}px)` }} />
+        <Blob style={{ width: 200, height: 200, background: "#f3e5f5", bottom: -80, right: -100, opacity: 0.3, transform: `translateY(${scrollY * -0.15}px)` }} />
+        <Blob style={{ width: 180, height: 180, background: "#e0f2f1", top: "40%", right: "10%", opacity: 0.3, transform: `translateY(${scrollY * 0.2}px)` }} />
+        {screen !== "home" && <div style={{ background: "rgba(255,255,255,0.7)", backdropFilter: "blur(8px)", borderBottom: "1.5px solid rgba(224,242,241,0.4)", padding: "1rem 2rem", display: "flex", alignItems: "center", gap: "0.5rem", justifyContent: "center" }}>
+          <span style={{ fontSize: "2rem" }}>🥟</span>
+          <span style={{ fontFamily: "'Fredoka One', cursive", color: "#ff6a00", fontSize: "2.5rem", textShadow: "2px 2px 0 #fff, 0 0 20px rgba(255,120,0,0.4)" }}>Potluck Pal</span>
+          {userName && <span style={{ fontFamily: "'Nunito', sans-serif", fontStyle: "italic", color: "#5d4e37", fontSize: "1rem", marginLeft: "auto" }}>Hi, {userName}! 👋</span>}
+        </div>}
+        <div style={{ padding: "2rem", maxWidth: "800px", margin: "0 auto" }}>
           {(screen === "home" || screen === "event-join") && (
             <HomeScreen onCreateEvent={(n) => { setUserName(n); setScreen("create"); }} onJoinEvent={handleJoinEvent} onViewHistory={(n) => { setHistoryUser(n); setUserName(n); setScreen("history"); }} />
           )}
