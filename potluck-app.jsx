@@ -669,33 +669,48 @@ export default function App() {
   }, []);
 
   const handleCreateEvent = useCallback(async (form) => {
-    const id = generateId();
-    const newEvent = { id, ...form, createdBy: userName, items: [], createdAt: Date.now() };
-    await set(ref(db, `events/${id}`), newEvent);
-    registerUserEvent(userName, id);
-    setCurrentEventId(id);
-    setScreen("event");
+    try {
+      const id = generateId();
+      const newEvent = { id, ...form, createdBy: userName, items: [], createdAt: Date.now() };
+      await set(ref(db, `events/${id}`), newEvent);
+      registerUserEvent(userName, id);
+      setCurrentEventId(id);
+      setScreen("event");
+    } catch (err) {
+      console.error("Failed to create event:", err);
+      alert("Could not create event — check your internet connection and try again.\n\nIf this is a Vercel deployment, make sure the Firebase environment variables are set in the Vercel dashboard.");
+    }
   }, [userName, registerUserEvent]);
 
   const handleJoinEvent = useCallback(async (id, name) => {
-    setUserName(name);
-    const snap = await get(ref(db, `events/${id}`));
-    if (snap.exists()) {
-      registerUserEvent(name, id);
-      setCurrentEventId(id);
-      setScreen("event");
-    } else {
-      alert("Event not found. Please check the link or ID.");
+    try {
+      setUserName(name);
+      const snap = await get(ref(db, `events/${id}`));
+      if (snap.exists()) {
+        registerUserEvent(name, id);
+        setCurrentEventId(id);
+        setScreen("event");
+      } else {
+        alert("Event not found. Please check the link or ID.");
+      }
+    } catch (err) {
+      console.error("Failed to join event:", err);
+      alert("Could not connect to the event — check your internet connection and try again.");
     }
   }, [registerUserEvent]);
 
   const handleAddItem = useCallback(async (eventId, item, bringer) => {
-    const newItem = { id: generateId(), itemName: item.itemName, quantity: item.quantity, bringerName: bringer, emoji: getFoodEmoji(item.itemName), addedAt: Date.now() };
-    const itemsRef = ref(db, `events/${eventId}/items`);
-    const snap = await get(itemsRef);
-    const current = snap.val() || [];
-    await set(itemsRef, [...current, newItem]);
-    registerUserEvent(bringer, eventId);
+    try {
+      const newItem = { id: generateId(), itemName: item.itemName, quantity: item.quantity, bringerName: bringer, emoji: getFoodEmoji(item.itemName), addedAt: Date.now() };
+      const itemsRef = ref(db, `events/${eventId}/items`);
+      const snap = await get(itemsRef);
+      const current = snap.val() || [];
+      await set(itemsRef, [...current, newItem]);
+      registerUserEvent(bringer, eventId);
+    } catch (err) {
+      console.error("Failed to add item:", err);
+      alert("Could not add item — check your internet connection and try again.");
+    }
   }, [registerUserEvent]);
 
   const handleDeleteEvent = useCallback(async (eventId) => {
