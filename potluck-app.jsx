@@ -1,6 +1,17 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import homeBg from "./src/homebackground.png";
 
+// ── Mobile hook ───────────────────────────────────────────────────────────────
+const useIsMobile = () => {
+  const [mobile, setMobile] = useState(() => window.innerWidth < 640);
+  useEffect(() => {
+    const handler = () => setMobile(window.innerWidth < 640);
+    window.addEventListener("resize", handler);
+    return () => window.removeEventListener("resize", handler);
+  }, []);
+  return mobile;
+};
+
 // ── Food emoji mapping ────────────────────────────────────────────────────────
 const getFoodEmoji = (itemName) => {
   const name = itemName.toLowerCase();
@@ -271,30 +282,31 @@ function Select({ label, value, onChange, options, required, placeholder = "— 
 
 // ── Home Screen ───────────────────────────────────────────────────────────────
 function HomeScreen({ onCreateEvent, onJoinEvent, onViewHistory }) {
+  const isMobile = useIsMobile();
   const [name, setName]         = useState("");
   const [joinName, setJoinName] = useState("");
   const [code, setCode]         = useState("");
   const [histName, setHistName] = useState("");
   return (
-    <div style={{ maxWidth: 1200, margin: "0 auto", paddingTop: "2rem", paddingBottom: "3rem", paddingLeft: "1rem", paddingRight: "1rem", display: "flex", flexDirection: "column", gap: "1rem", justifyContent: "center", backgroundImage: `linear-gradient(rgba(255,245,235,0.55), rgba(255,245,235,0.55)), url(${homeBg})`, backgroundSize: "cover", backgroundPosition: "center", backgroundRepeat: "no-repeat", borderRadius: "20px", position: "relative" }}>
-      <div style={{ textAlign: "center", marginBottom: "2.5rem" }}>
-        <div style={{ fontSize: "4rem", marginBottom: "0.4rem" }}>🥟</div>
-        <h1 style={{ fontFamily: "'Fredoka One', cursive", fontSize: "6.5rem", color: "#ff6a00", margin: 0, lineHeight: 1.1, fontWeight: "900", textShadow: "3px 3px 0 #fff, 6px 6px 0 rgba(255,150,0,0.35), 0 0 40px rgba(255,120,0,0.5)" }}>Potluck Pal</h1>
-        <p style={{ fontFamily: "'Nunito', sans-serif", fontStyle: "italic", color: "#3e2000", marginTop: 8, fontSize: "1.1rem", display: "inline-block", background: "rgba(255,245,220,0.72)", borderRadius: 20, padding: "4px 18px" }}>Bring something delicious, share something wonderful 🎉</p>
+    <div style={{ maxWidth: 1200, margin: "0 auto", paddingTop: isMobile ? "1rem" : "2rem", paddingBottom: isMobile ? "1.5rem" : "3rem", paddingLeft: isMobile ? "0.5rem" : "1rem", paddingRight: isMobile ? "0.5rem" : "1rem", display: "flex", flexDirection: "column", gap: "1rem", justifyContent: "center", backgroundImage: `linear-gradient(rgba(255,245,235,0.55), rgba(255,245,235,0.55)), url(${homeBg})`, backgroundSize: "cover", backgroundPosition: "center", backgroundRepeat: "no-repeat", borderRadius: "20px", position: "relative" }}>
+      <div style={{ textAlign: "center", marginBottom: isMobile ? "1rem" : "2.5rem" }}>
+        <div style={{ fontSize: "clamp(2rem, 10vw, 4rem)", marginBottom: "0.4rem" }}>🥟</div>
+        <h1 style={{ fontFamily: "'Fredoka One', cursive", fontSize: "clamp(2.8rem, 14vw, 6.5rem)", color: "#ff6a00", margin: 0, lineHeight: 1.1, fontWeight: "900", textShadow: "3px 3px 0 #fff, 6px 6px 0 rgba(255,150,0,0.35), 0 0 40px rgba(255,120,0,0.5)" }}>Potluck Pal</h1>
+        <p style={{ fontFamily: "'Nunito', sans-serif", fontStyle: "italic", color: "#3e2000", marginTop: 8, fontSize: "clamp(0.85rem, 3.5vw, 1.1rem)", display: "inline-block", background: "rgba(255,245,220,0.72)", borderRadius: 20, padding: "4px 18px" }}>Bring something delicious, share something wonderful 🎉</p>
       </div>
       <div style={{ display: "flex", flexDirection: "row", gap: "1rem", flexWrap: "wrap", justifyContent: "center" }}>
-        <Card style={{ flex: "1 1 300px", maxWidth: "400px" }}>
+        <Card style={{ flex: "1 1 min(300px, 100%)", maxWidth: "400px", padding: isMobile ? "1.25rem" : "2rem" }}>
           <h2 style={{ fontFamily: "'Fredoka One', cursive", fontStyle: "italic", color: "#d84315", marginTop: 0, fontSize: "1.4rem" }}>🎊 Host a Potluck</h2>
         <Input value={name} onChange={setName} placeholder="Your name, e.g. Grandma Sue" required />
         <Button onClick={() => name.trim() && onCreateEvent(name.trim())} disabled={!name.trim()} style={{ width: "100%" }}>🎊 Create a New Event</Button>
       </Card>
-      <Card style={{ flex: "1 1 300px", maxWidth: "400px" }}>
+      <Card style={{ flex: "1 1 min(300px, 100%)", maxWidth: "400px", padding: isMobile ? "1.25rem" : "2rem" }}>
         <h2 style={{ fontFamily: "'Fredoka One', cursive", fontStyle: "italic", color: "#d84315", marginTop: 0, fontSize: "1.4rem" }}>🔗 Join an Existing Event</h2>
         <Input value={joinName} onChange={setJoinName} placeholder="Your name..." required />
         <Input value={code} onChange={setCode} placeholder="Paste event ID or share link..." />
         <Button onClick={() => { if (!joinName.trim() || !code.trim()) return; const m = code.match(/event=([a-z0-9]+)/); onJoinEvent(m ? m[1] : code.trim(), joinName.trim()); }} disabled={!joinName.trim() || !code.trim()} variant="secondary" style={{ width: "100%" }}>🚪 Join Event</Button>
       </Card>
-      <Card style={{ flex: "1 1 300px", maxWidth: "400px" }}>
+      <Card style={{ flex: "1 1 min(300px, 100%)", maxWidth: "400px", padding: isMobile ? "1.25rem" : "2rem" }}>
         <h2 style={{ fontFamily: "'Fredoka One', cursive", fontStyle: "italic", color: "#d84315", marginTop: 0, fontSize: "1.4rem" }}>📖 My Past Events</h2>
         <Input value={histName} onChange={setHistName} placeholder="Enter your name to look up events..." />
         <Button onClick={() => histName.trim() && onViewHistory(histName.trim())} disabled={!histName.trim()} variant="ghost" style={{ width: "100%", border: "1.5px solid #e0f2f1" }}>🔍 Look Up My Events</Button>
@@ -393,7 +405,7 @@ function PotluckTable({ items, eventName, mealType }) {
       <span style={{ fontFamily: "'Fredoka One', cursive", fontSize: "0.88rem", marginBottom: "0.7rem", background: "rgba(255,255,255,0.8)", padding: "3px 18px", borderRadius: 20, border: `1.5px solid ${theme.ring}`, color: "#5d4037", boxShadow: `0 0 10px ${theme.glow}`, letterSpacing: "0.06em" }}>
         🍽️ The Table
       </span>
-      <div style={{ position: "relative", width: 320, height: 320, borderRadius: "50%", background: theme.bg, boxShadow: `0 0 0 7px ${theme.ring}, 0 0 50px ${theme.glow}, 0 14px 45px rgba(0,0,0,0.32), inset 0 4px 24px rgba(255,255,255,0.08)`, display: "flex", alignItems: "center", justifyContent: "center", overflow: "hidden" }}>
+      <div style={{ position: "relative", width: "min(320px, 88vw)", height: "min(320px, 88vw)", borderRadius: "50%", background: theme.bg, boxShadow: `0 0 0 7px ${theme.ring}, 0 0 50px ${theme.glow}, 0 14px 45px rgba(0,0,0,0.32), inset 0 4px 24px rgba(255,255,255,0.08)`, display: "flex", alignItems: "center", justifyContent: "center", overflow: "hidden" }}>
         {/* dashed inner ring */}
         <div style={{ position: "absolute", inset: 14, borderRadius: "50%", border: "2px dashed rgba(255,255,255,0.15)", pointerEvents: "none" }} />
         {/* highlight gleam */}
@@ -506,7 +518,7 @@ function EventScreen({ event, userName, onAddItem, onBack }) {
       <Card style={{ marginBottom: "1.2rem" }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: "0.5rem" }}>
           <div>
-            <h2 style={{ fontFamily: "'Fredoka One', cursive", fontStyle: "italic", color: "#5d4e37", marginTop: 0, fontSize: "1.8rem" }}>🎊 {event.name}</h2>
+            <h2 style={{ fontFamily: "'Fredoka One', cursive", fontStyle: "italic", color: "#5d4e37", marginTop: 0, fontSize: "clamp(1.3rem, 5vw, 1.8rem)" }}>🎊 {event.name}</h2>
             {mealLabel && <p style={{ fontFamily: "'Nunito', sans-serif", fontStyle: "italic", color: "#5d4e37", margin: "4px 0", fontSize: "0.92rem" }}>🍴 {mealLabel}</p>}
             <p style={{ fontFamily: "'Nunito', sans-serif", fontStyle: "italic", color: "#5d4e37", margin: "4px 0", fontSize: "0.92rem" }}>📅 {fmtDate(event.date)} at {fmtTime(event.time)}</p>
             <p style={{ fontFamily: "'Nunito', sans-serif", fontStyle: "italic", color: "#5d4e37", margin: "4px 0", fontSize: "0.92rem" }}>📍 {event.location}</p>
@@ -519,7 +531,7 @@ function EventScreen({ event, userName, onAddItem, onBack }) {
               {shareOpen ? "✕ Close" : "🔗 Share Link"}
             </Button>
             {shareOpen && (
-              <div style={{ background: "rgba(255,250,245,0.98)", border: `2px solid ${theme.ring}`, borderRadius: 16, padding: "0.85rem 1rem", boxShadow: `0 6px 28px ${theme.glow}`, minWidth: 260, maxWidth: 360, animation: "popIn 0.25s cubic-bezier(0.34,1.56,0.64,1)" }}>
+              <div style={{ background: "rgba(255,250,245,0.98)", border: `2px solid ${theme.ring}`, borderRadius: 16, padding: "0.85rem 1rem", boxShadow: `0 6px 28px ${theme.glow}`, minWidth: 0, width: "min(360px, calc(100vw - 3rem))", animation: "popIn 0.25s cubic-bezier(0.34,1.56,0.64,1)" }}>
                 <p style={{ fontFamily: "'Fredoka One', cursive", fontStyle: "italic", color: "#5d4e37", fontSize: "0.88rem", margin: "0 0 0.5rem" }}>🔗 Share with your guests:</p>
                 <div style={{ background: "rgba(255,255,255,0.95)", border: "1.5px solid #ffccbc", borderRadius: 10, padding: "0.45rem 0.7rem", display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "0.5rem" }}>
                   <span style={{ fontFamily: "monospace", fontSize: "0.72rem", color: "#5d4037", flex: 1, overflowX: "auto", whiteSpace: "nowrap", userSelect: "all", lineHeight: 1.4 }}>
@@ -546,6 +558,7 @@ function EventScreen({ event, userName, onAddItem, onBack }) {
 
 // ── App Root ──────────────────────────────────────────────────────────────────
 export default function App() {
+  const isMobile = useIsMobile();
   const [screen, setScreen]                 = useState("home");
   const [events, setEvents]                 = useState({});
   const [userMap, setUserMap]               = useState({});
@@ -628,12 +641,12 @@ export default function App() {
         <Blob style={{ width: 250, height: 250, background: "#fce4ec", top: -100, left: -150, opacity: 0.3, transform: `translateY(${scrollY * 0.1}px)` }} />
         <Blob style={{ width: 200, height: 200, background: "#f3e5f5", bottom: -80, right: -100, opacity: 0.3, transform: `translateY(${scrollY * -0.15}px)` }} />
         <Blob style={{ width: 180, height: 180, background: "#e0f2f1", top: "40%", right: "10%", opacity: 0.3, transform: `translateY(${scrollY * 0.2}px)` }} />
-        {screen !== "home" && <div style={{ background: "rgba(255,255,255,0.7)", backdropFilter: "blur(8px)", borderBottom: "1.5px solid rgba(224,242,241,0.4)", padding: "1rem 2rem", display: "flex", alignItems: "center", gap: "0.5rem", justifyContent: "center" }}>
-          <span style={{ fontSize: "2rem" }}>🥟</span>
-          <span style={{ fontFamily: "'Fredoka One', cursive", color: "#ff6a00", fontSize: "2.5rem", textShadow: "2px 2px 0 #fff, 0 0 20px rgba(255,120,0,0.4)" }}>Potluck Pal</span>
-          {userName && <span style={{ fontFamily: "'Nunito', sans-serif", fontStyle: "italic", color: "#5d4e37", fontSize: "1rem", marginLeft: "auto" }}>Hi, {userName}! 👋</span>}
+        {screen !== "home" && <div style={{ background: "rgba(255,255,255,0.7)", backdropFilter: "blur(8px)", borderBottom: "1.5px solid rgba(224,242,241,0.4)", padding: isMobile ? "0.6rem 1rem" : "1rem 2rem", display: "flex", alignItems: "center", gap: "0.5rem", justifyContent: "center" }}>
+          <span style={{ fontSize: isMobile ? "1.5rem" : "2rem" }}>🥟</span>
+          <span style={{ fontFamily: "'Fredoka One', cursive", color: "#ff6a00", fontSize: "clamp(1.4rem, 5vw, 2.5rem)", textShadow: "2px 2px 0 #fff, 0 0 20px rgba(255,120,0,0.4)" }}>Potluck Pal</span>
+          {userName && <span style={{ fontFamily: "'Nunito', sans-serif", fontStyle: "italic", color: "#5d4e37", fontSize: isMobile ? "0.8rem" : "1rem", marginLeft: "auto" }}>Hi, {userName}! 👋</span>}
         </div>}
-        <div style={{ padding: "2rem", maxWidth: "800px", margin: "0 auto" }}>
+        <div style={{ padding: isMobile ? "1rem" : "2rem", maxWidth: "800px", margin: "0 auto" }}>
           {(screen === "home" || screen === "event-join") && (
             <HomeScreen onCreateEvent={(n) => { setUserName(n); setScreen("create"); }} onJoinEvent={handleJoinEvent} onViewHistory={(n) => { setHistoryUser(n); setUserName(n); setScreen("history"); }} />
           )}
