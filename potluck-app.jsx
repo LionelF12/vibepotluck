@@ -17,65 +17,98 @@ const getFoodEmoji = (itemName) => {
   const name = itemName.toLowerCase();
   const emojiMap = [
     { keys: ["pizza"], emoji: "🍕" },
-    { keys: ["burger", "hamburger"], emoji: "🍔" },
-    { keys: ["taco", "tacos"], emoji: "🌮" },
-    { keys: ["salad"], emoji: "🥗" },
-    { keys: ["pasta", "spaghetti", "noodle", "lasagna"], emoji: "🍝" },
-    { keys: ["rice"], emoji: "🍚" },
+    { keys: ["burger", "hamburger", "slider"], emoji: "🍔" },
+    { keys: ["taco", "tacos", "tortilla"], emoji: "🌮" },
+    { keys: ["salad", "coleslaw", "slaw", "tabbouleh"], emoji: "🥗" },
+    { keys: ["pasta", "spaghetti", "noodle", "lasagna", "gnocchi", "pesto", "marinara", "alfredo"], emoji: "🍝" },
+    { keys: ["rice", "fried rice", "risotto", "biryani", "couscous", "quinoa"], emoji: "🍚" },
     { keys: ["sushi", "roll", "maki"], emoji: "🍱" },
-    { keys: ["soup", "stew", "chili"], emoji: "🍲" },
-    { keys: ["bread", "baguette", "loaf"], emoji: "🍞" },
-    { keys: ["cake", "cupcake", "birthday cake"], emoji: "🎂" },
-    { keys: ["cookie", "cookies", "brownie"], emoji: "🍪" },
-    { keys: ["pie"], emoji: "🥧" },
+    { keys: ["soup", "stew", "chili", "gravy"], emoji: "🍲" },
+    { keys: ["casserole", "gratin", "paella"], emoji: "🥘" },
+    { keys: ["mac and cheese", "macaroni"], emoji: "🧀" },
+    { keys: ["ramen", "pho", "lo mein", "udon", "pad thai"], emoji: "🍜" },
+    { keys: ["bread", "baguette", "loaf", "brioche", "focaccia", "french toast", "zucchini bread", "banana bread"], emoji: "🍞" },
+    { keys: ["bagel"], emoji: "🥯" },
+    { keys: ["roll", "bun", "dinner roll"], emoji: "🍞" },
+    { keys: ["naan", "pita", "flatbread", "lavash"], emoji: "🫓" },
+    { keys: ["croissant", "danish", "scone", "biscuit"], emoji: "🥐" },
+    { keys: ["waffle", "pancake", "crepe"], emoji: "🧇" },
+    { keys: ["cake", "cupcake", "birthday cake", "coffee cake", "cheesecake"], emoji: "🎂" },
+    { keys: ["cookie", "cookies", "brownie", "shortbread", "gingerbread"], emoji: "🍪" },
+    { keys: ["cobbler", "crisp", "crumble", "pie", "tart"], emoji: "🥧" },
+    { keys: ["donut", "doughnut", "churro"], emoji: "🍩" },
+    { keys: ["muffin"], emoji: "🧁" },
+    { keys: ["candy", "sweets", "fudge", "truffle", "bark"], emoji: "🍫" },
+    { keys: ["chocolate"], emoji: "🍫" },
+    { keys: ["tiramisu", "mousse", "pudding", "flan", "custard"], emoji: "🍮" },
+    { keys: ["ice cream", "icecream", "gelato", "sorbet"], emoji: "🍦" },
     { keys: ["fruit", "fruits", "berry", "berries"], emoji: "🍓" },
+    { keys: ["strawberry"], emoji: "🍓" },
+    { keys: ["blueberry", "blueberries"], emoji: "🫐" },
     { keys: ["watermelon"], emoji: "🍉" },
-    { keys: ["apple"], emoji: "🍎" },
+    { keys: ["apple", "cider"], emoji: "🍎" },
     { keys: ["banana"], emoji: "🍌" },
+    { keys: ["mango"], emoji: "🥭" },
     { keys: ["grape", "grapes"], emoji: "🍇" },
-    { keys: ["corn"], emoji: "🌽" },
+    { keys: ["cherry", "cherries"], emoji: "🍒" },
+    { keys: ["peach", "plum"], emoji: "🍑" },
+    { keys: ["pineapple"], emoji: "🍍" },
+    { keys: ["coconut"], emoji: "🥥" },
+    { keys: ["kiwi"], emoji: "🥝" },
+    { keys: ["orange", "mandarin", "clementine", "tangerine"], emoji: "🍊" },
+    { keys: ["pear"], emoji: "🍐" },
+    { keys: ["lemon", "lemonade", "lemon tart"], emoji: "🍋" },
+    { keys: ["corn", "cornbread", "corn bread", "polenta", "grits"], emoji: "🌽" },
     { keys: ["carrot"], emoji: "🥕" },
     { keys: ["broccoli"], emoji: "🥦" },
+    { keys: ["tomato", "caprese", "bruschetta", "marinara"], emoji: "🍅" },
+    { keys: ["spinach", "kale", "arugula", "lettuce"], emoji: "🥬" },
+    { keys: ["cucumber"], emoji: "🥒" },
+    { keys: ["sweet potato", "yam"], emoji: "🍠" },
+    { keys: ["green bean", "edamame", "pea", "snap pea"], emoji: "🫛" },
+    { keys: ["mushroom"], emoji: "🍄" },
+    { keys: ["potato", "potatoes", "mashed", "hash brown"], emoji: "🥔" },
+    { keys: ["avocado", "guacamole"], emoji: "🥑" },
     { keys: ["sandwich"], emoji: "🥪" },
     { keys: ["hotdog", "hot dog"], emoji: "🌭" },
-    { keys: ["fries", "chips"], emoji: "🍟" },
-    { keys: ["donut", "doughnut"], emoji: "🍩" },
-    { keys: ["ice cream", "icecream"], emoji: "🍦" },
-    { keys: ["chicken", "poultry"], emoji: "🍗" },
-    { keys: ["meat", "beef", "steak", "bbq", "grill"], emoji: "🥩" },
-    { keys: ["fish", "seafood", "shrimp"], emoji: "🐟" },
-    { keys: ["egg", "eggs", "deviled"], emoji: "🥚" },
-    { keys: ["cheese"], emoji: "🧀" },
-    { keys: ["lemonade", "juice"], emoji: "🍋" },
-    { keys: ["wine"], emoji: "🍷" },
-    { keys: ["beer"], emoji: "🍺" },
-    { keys: ["water", "drink", "soda", "beverage"], emoji: "🥤" },
-    { keys: ["mushroom"], emoji: "🍄" },
-    { keys: ["potato", "potatoes", "mashed"], emoji: "🥔" },
-    { keys: ["avocado", "guacamole"], emoji: "🥑" },
-    { keys: ["wrap", "burrito"], emoji: "🌯" },
-    { keys: ["dumpling", "dim sum"], emoji: "🥟" },
+    { keys: ["fries", "chips", "nachos"], emoji: "🍟" },
+    { keys: ["salsa"], emoji: "🌶️" },
+    { keys: ["buffalo", "wing", "wings"], emoji: "🍗" },
+    { keys: ["chicken", "poultry", "fried chicken", "grilled chicken"], emoji: "🍗" },
+    { keys: ["turkey"], emoji: "🦃" },
+    { keys: ["meat", "beef", "steak", "bbq", "grill", "ribs", "brisket", "pot roast", "lamb"], emoji: "🥩" },
+    { keys: ["pork", "bacon", "sausage", "ham"], emoji: "🥓" },
+    { keys: ["fish", "seafood", "salmon", "tuna"], emoji: "🐟" },
+    { keys: ["shrimp", "crab", "lobster", "clam", "oyster", "mussel", "scallop"], emoji: "🦞" },
+    { keys: ["egg", "eggs", "deviled", "quiche", "frittata", "shakshuka"], emoji: "🥚" },
+    { keys: ["cheese", "queso", "charcuterie", "antipasto"], emoji: "🧀" },
+    { keys: ["hummus", "baked beans", "lentil", "bean", "black bean", "chickpea"], emoji: "🫘" },
+    { keys: ["tofu", "tempeh"], emoji: "🫘" },
+    { keys: ["wrap", "burrito", "enchilada", "spring roll", "empanada", "samosa"], emoji: "🌯" },
+    { keys: ["dumpling", "dim sum", "wonton", "falafel"], emoji: "🥟" },
     { keys: ["curry"], emoji: "🍛" },
-    { keys: ["kebab"], emoji: "🍢" },
+    { keys: ["kebab", "shawarma", "gyro"], emoji: "🍢" },
     { keys: ["pretzel"], emoji: "🥨" },
-    { keys: ["croissant"], emoji: "🥐" },
-    { keys: ["waffle", "pancake"], emoji: "🧇" },
-    { keys: ["muffin"], emoji: "🧁" },
-    { keys: ["candy", "sweets", "chocolate"], emoji: "🍫" },
+    { keys: ["oatmeal", "oats", "porridge", "cereal", "granola"], emoji: "🥣" },
+    { keys: ["honey", "syrup", "jam", "jelly"], emoji: "🍯" },
+    { keys: ["butter"], emoji: "🧈" },
+    { keys: ["milk", "cream", "yogurt", "tzatziki"], emoji: "🥛" },
+    { keys: ["nut", "nuts", "almond", "cashew", "peanut", "trail mix"], emoji: "🥜" },
     { keys: ["pumpkin"], emoji: "🎃" },
-    { keys: ["honey"], emoji: "🍯" },
-    { keys: ["nut", "nuts", "almond", "cashew", "peanut"], emoji: "🥜" },
-    { keys: ["tofu"], emoji: "🫘" },
-    { keys: ["oatmeal", "oats", "porridge", "cereal"], emoji: "🥣" },
-    { keys: ["bacon", "sausage", "ham"], emoji: "🥓" },
-    { keys: ["orange"], emoji: "🍊" },
+    { keys: ["juice"], emoji: "🍋" },
+    { keys: ["mimosa", "champagne", "sparkling"], emoji: "🍾" },
+    { keys: ["punch"], emoji: "🍹" },
+    { keys: ["wine", "sangria"], emoji: "🍷" },
+    { keys: ["beer"], emoji: "🍺" },
+    { keys: ["iced tea", "sweet tea", "boba"], emoji: "🧋" },
+    { keys: ["water", "soda", "beverage", "drink"], emoji: "🥤" },
     { keys: ["coffee", "espresso", "latte"], emoji: "☕" },
     { keys: ["tea"], emoji: "🍵" },
   ];
   for (const { keys, emoji } of emojiMap) {
     if (keys.some((k) => name.includes(k))) return emoji;
   }
-  return "🍽️";
+  return "🎁";
 };
 
 // ── Contextual food recommendations ──────────────────────────────────────────
@@ -100,16 +133,16 @@ const getEventRecommendations = (eventName, mealType) => {
     { keys: ["potluck", "community", "neighborhood"],     items: ["Pasta Salad", "Fried Chicken", "Potato Salad", "Dinner Rolls", "Sheet Cake", "Sweet Tea", "Baked Beans"] },
   ];
   const mealDefaults = {
-    breakfast: ["Pancakes", "Scrambled Eggs", "Bacon", "Coffee", "Orange Juice", "Waffles", "Toast"],
-    brunch:    ["French Toast", "Quiche", "Croissants", "Fruit Salad", "Mimosas", "Coffee", "Muffins"],
-    lunch:     ["Garden Salad", "Sandwiches", "Pasta Salad", "Pizza Slices", "Iced Tea", "Rolls", "Fresh Fruit"],
-    dinner:    ["Green Salad", "Roasted Chicken", "Mashed Potatoes", "Steamed Veggies", "Dinner Rolls", "Wine", "Dessert"],
-    supper:    ["Casserole", "Side Salad", "Cornbread", "Pie", "Sweet Tea", "Baked Beans", "Fried Chicken"],
+    breakfast: ["Pancakes", "Scrambled Eggs", "Bacon", "Hash Browns", "Fresh Fruit Salad", "Coffee Cake", "Orange Juice"],
+    brunch:    ["Quiche", "Mimosas", "Avocado Toast", "Bagels & Cream Cheese", "Cinnamon Rolls", "Fruit Salad", "Coffee"],
+    lunch:     ["Pasta Salad", "Fried Chicken", "Potato Salad", "Chips & Dip", "Coleslaw", "Lemonade", "Cookies"],
+    dinner:    ["Mac & Cheese", "Green Bean Casserole", "Mashed Potatoes", "Fried Chicken", "Dinner Rolls", "Sweet Tea", "Sheet Cake"],
+    supper:    ["Baked Beans", "Cornbread", "Fried Chicken", "Coleslaw", "Sweet Potato Casserole", "Peach Cobbler", "Sweet Tea"],
   };
   for (const { keys, items } of contextMap) {
     if (keys.some((k) => name.includes(k))) return items;
   }
-  return mealDefaults[meal] || ["🥗 Salad", "🍗 Main Dish", "🍞 Bread", "🥤 Drinks", "🍰 Dessert", "🍝 Pasta", "🥔 Side Dish"];
+  return mealDefaults[meal] || ["Pasta Salad", "Fried Chicken", "Mac & Cheese", "Potato Salad", "Dinner Rolls", "Sheet Cake", "Sweet Tea"];
 };
 
 // ── Contextual table themes ───────────────────────────────────────────────────
@@ -117,61 +150,61 @@ const getTableTheme = (eventName, mealType) => {
   const name = (eventName || "").toLowerCase();
   const themes = [
     { keys: ["bbq", "barbecue", "grill", "cookout"],
-      bg: "radial-gradient(circle at 35% 35%, #8d4a20 0%, #5a2d0c 55%, #2d1508 100%)",
-      ring: "#cd7f32", glow: "rgba(180,90,30,0.55)", label: "#ffcc80", woodGrain: true },
+      bg: "radial-gradient(circle at 35% 35%, #ffe8c8 0%, #f5c992 55%, #e8a854 100%)",
+      ring: "#f5c892", glow: "rgba(245,200,146,0.55)", label: "#5c3200" },
     { keys: ["christmas", "holiday", "xmas", "festive"],
-      bg: "radial-gradient(circle at 35% 35%, #2e7d32 0%, #1b5e20 55%, #0a3d0a 100%)",
-      ring: "#ef5350", glow: "rgba(198,40,40,0.5)", label: "#ffeb3b", woodGrain: false },
+      bg: "radial-gradient(circle at 35% 35%, #d4edda 0%, #b5d8c4 55%, #8ec4a8 100%)",
+      ring: "#ef9a9a", glow: "rgba(239,154,154,0.5)", label: "#1b5e20" },
     { keys: ["halloween", "spooky", "trick"],
-      bg: "radial-gradient(circle at 35% 35%, #6a1b9a 0%, #4a148c 55%, #1a0050 100%)",
-      ring: "#ff6d00", glow: "rgba(255,109,0,0.55)", label: "#ff6d00", woodGrain: false },
+      bg: "radial-gradient(circle at 35% 35%, #f5d9fa 0%, #e4b0f0 55%, #ce87e0 100%)",
+      ring: "#ffb347", glow: "rgba(255,179,71,0.55)", label: "#4a1060" },
     { keys: ["birthday", "bday", "party", "celebration"],
-      bg: "radial-gradient(circle at 35% 35%, #c2185b 0%, #880e4f 55%, #5c0033 100%)",
-      ring: "#f48fb1", glow: "rgba(244,143,177,0.5)", label: "#fce4ec", woodGrain: false },
+      bg: "radial-gradient(circle at 35% 35%, #fce4ec 0%, #f8bbd9 55%, #f48fb1 100%)",
+      ring: "#ce93d8", glow: "rgba(206,147,216,0.5)", label: "#880e4f" },
     { keys: ["thanksgiving", "harvest", "fall"],
-      bg: "radial-gradient(circle at 35% 35%, #d84315 0%, #bf360c 55%, #7f1d00 100%)",
-      ring: "#ffb300", glow: "rgba(255,179,0,0.5)", label: "#fff8e1", woodGrain: true },
+      bg: "radial-gradient(circle at 35% 35%, #fde8c8 0%, #f5c87a 55%, #e8a84a 100%)",
+      ring: "#f5c87a", glow: "rgba(245,200,122,0.5)", label: "#5c3200" },
     { keys: ["summer", "picnic", "garden", "outdoor"],
-      bg: "radial-gradient(circle at 35% 35%, #388e3c 0%, #2e7d32 55%, #1b5e20 100%)",
-      ring: "#a5d6a7", glow: "rgba(165,214,167,0.5)", label: "#f1f8e9", woodGrain: false },
+      bg: "radial-gradient(circle at 35% 35%, #d4f5d4 0%, #a8e6a3 55%, #76c870 100%)",
+      ring: "#a8d5b5", glow: "rgba(168,213,181,0.55)", label: "#1b5e20" },
     { keys: ["taco", "mexican", "fiesta", "cinco"],
-      bg: "radial-gradient(circle at 35% 35%, #e65100 0%, #bf360c 55%, #8d2000 100%)",
-      ring: "#ffca28", glow: "rgba(255,202,40,0.55)", label: "#fff8e1", woodGrain: false },
+      bg: "radial-gradient(circle at 35% 35%, #ffe8c8 0%, #f5c07a 55%, #e8a040 100%)",
+      ring: "#ffe082", glow: "rgba(255,224,130,0.55)", label: "#5c2800" },
     { keys: ["italian", "pasta", "pizza night"],
-      bg: "radial-gradient(circle at 35% 35%, #c62828 0%, #b71c1c 55%, #7f0000 100%)",
-      ring: "#ffffff", glow: "rgba(255,255,255,0.3)", label: "#ffebee", woodGrain: false },
+      bg: "radial-gradient(circle at 35% 35%, #fce4e4 0%, #f8b4b4 55%, #f08080 100%)",
+      ring: "#ef9a9a", glow: "rgba(239,154,154,0.5)", label: "#880e0e" },
     { keys: ["asian", "chinese", "japanese", "sushi", "korean"],
-      bg: "radial-gradient(circle at 35% 35%, #ad1457 0%, #880e4f 55%, #4a0030 100%)",
-      ring: "#f06292", glow: "rgba(240,98,146,0.5)", label: "#fce4ec", woodGrain: false },
+      bg: "radial-gradient(circle at 35% 35%, #fde8f0 0%, #f8b4d4 55%, #f080b0 100%)",
+      ring: "#f48fb1", glow: "rgba(244,143,177,0.5)", label: "#880e4f" },
     { keys: ["game", "super bowl", "sports", "watch"],
-      bg: "radial-gradient(circle at 35% 35%, #283593 0%, #1a237e 55%, #0d1642 100%)",
-      ring: "#42a5f5", glow: "rgba(66,165,245,0.5)", label: "#e3f2fd", woodGrain: false },
+      bg: "radial-gradient(circle at 35% 35%, #dde8fa 0%, #b3c8f5 55%, #8898e0 100%)",
+      ring: "#90caf9", glow: "rgba(144,202,249,0.5)", label: "#283593" },
     { keys: ["vegan", "vegetarian", "plant", "healthy"],
-      bg: "radial-gradient(circle at 35% 35%, #558b2f 0%, #33691e 55%, #1b4004 100%)",
-      ring: "#aed581", glow: "rgba(174,213,129,0.5)", label: "#f1f8e9", woodGrain: false },
+      bg: "radial-gradient(circle at 35% 35%, #d4f0d4 0%, #a8d8a8 55%, #76b876 100%)",
+      ring: "#aed581", glow: "rgba(174,213,129,0.5)", label: "#1b5e20" },
     { keys: ["seafood", "fish", "clambake", "lobster"],
-      bg: "radial-gradient(circle at 35% 35%, #00838f 0%, #006064 55%, #001f20 100%)",
-      ring: "#4dd0e1", glow: "rgba(77,208,225,0.5)", label: "#e0f7fa", woodGrain: false },
+      bg: "radial-gradient(circle at 35% 35%, #d4f0f5 0%, #a8d8e8 55%, #70b8d0 100%)",
+      ring: "#80deea", glow: "rgba(128,222,234,0.5)", label: "#006064" },
     { keys: ["brunch", "mimosa"],
-      bg: "radial-gradient(circle at 35% 35%, #f57c00 0%, #e65100 55%, #9e3600 100%)",
-      ring: "#fff59d", glow: "rgba(255,245,157,0.5)", label: "#fffde7", woodGrain: false },
+      bg: "radial-gradient(circle at 35% 35%, #fce4ec 0%, #f8bbd9 55%, #f48fb1 100%)",
+      ring: "#fff59d", glow: "rgba(255,245,157,0.5)", label: "#880e4f" },
     { keys: ["dessert", "sweet", "candy", "chocolate"],
-      bg: "radial-gradient(circle at 35% 35%, #6d1b7b 0%, #4a148c 55%, #1a0050 100%)",
-      ring: "#f48fb1", glow: "rgba(244,143,177,0.5)", label: "#fce4ec", woodGrain: false },
+      bg: "radial-gradient(circle at 35% 35%, #f5e4f5 0%, #e8b8f0 55%, #d080d8 100%)",
+      ring: "#f48fb1", glow: "rgba(244,143,177,0.5)", label: "#4a0060" },
   ];
   const mealThemes = {
-    breakfast: { bg: "radial-gradient(circle at 35% 35%, #f57f17 0%, #bf360c 55%, #8d2000 100%)", ring: "#ffcc02", glow: "rgba(255,204,2,0.45)", label: "#fffde7", woodGrain: false },
-    brunch:    { bg: "radial-gradient(circle at 35% 35%, #e91e63 0%, #ad1457 55%, #6a0036 100%)", ring: "#f48fb1", glow: "rgba(244,143,177,0.45)", label: "#fce4ec", woodGrain: false },
-    lunch:     { bg: "radial-gradient(circle at 35% 35%, #558b2f 0%, #33691e 55%, #1b4004 100%)", ring: "#aed581", glow: "rgba(174,213,129,0.45)", label: "#f1f8e9", woodGrain: false },
-    dinner:    { bg: "radial-gradient(circle at 35% 35%, #4a148c 0%, #311b92 55%, #1a0050 100%)", ring: "#ce93d8", glow: "rgba(206,147,216,0.45)", label: "#f3e5f5", woodGrain: false },
-    supper:    { bg: "radial-gradient(circle at 35% 35%, #1a237e 0%, #0d1642 55%, #060d2c 100%)", ring: "#90caf9", glow: "rgba(144,202,249,0.45)", label: "#e3f2fd", woodGrain: false },
+    breakfast: { bg: "radial-gradient(circle at 35% 35%, #fff8d4 0%, #ffd97d 55%, #f9b347 100%)", ring: "#f4c842", glow: "rgba(244,200,66,0.55)", label: "#5c3d00" },
+    brunch:    { bg: "radial-gradient(circle at 35% 35%, #fce4ec 0%, #f8bbd9 55%, #f48fb1 100%)", ring: "#f8bbd9", glow: "rgba(248,187,217,0.55)", label: "#880e4f" },
+    lunch:     { bg: "radial-gradient(circle at 35% 35%, #d4edda 0%, #a8d5b5 55%, #74c08a 100%)", ring: "#b8e0b5", glow: "rgba(184,224,181,0.55)", label: "#1b5e20" },
+    dinner:    { bg: "radial-gradient(circle at 35% 35%, #dde3fa 0%, #b3bef5 55%, #8898e8 100%)", ring: "#c5caed", glow: "rgba(197,202,237,0.55)", label: "#283593" },
+    supper:    { bg: "radial-gradient(circle at 35% 35%, #ead5f5 0%, #d4a8e8 55%, #b87dd1 100%)", ring: "#d4a8e8", glow: "rgba(212,168,232,0.55)", label: "#4a148c" },
   };
   for (const theme of themes) {
     if (theme.keys.some((k) => name.includes(k))) return theme;
   }
   return mealThemes[(mealType || "").toLowerCase()] || {
-    bg: "radial-gradient(circle at 35% 35%, #6d4c41 0%, #4e342e 55%, #3e2723 100%)",
-    ring: "#ffcc80", glow: "rgba(255,204,128,0.45)", label: "#fff8e1", woodGrain: true
+    bg: "radial-gradient(circle at 35% 35%, #f5deb3 0%, #deb887 55%, #c4a26a 100%)",
+    ring: "#deb887", glow: "rgba(222,184,135,0.55)", label: "#5d3a1a"
   };
 };
 
@@ -394,37 +427,55 @@ function CreateEventScreen({ userName, onCreate, onBack }) {
 
 // ── Round Potluck Table ───────────────────────────────────────────────────────
 function PotluckTable({ items, eventName, mealType }) {
-  const theme   = getTableTheme(eventName, mealType);
-  const isEmpty = items.length === 0;
+  const theme    = getTableTheme(eventName, mealType);
+  const isMobile = useIsMobile();
+  const isEmpty  = items.length === 0;
   const tableItems = items.map((item, idx) => {
     const seed = item.id.split("").reduce((acc, c) => acc + c.charCodeAt(0), 0) + idx;
     return { ...item, animName: getItemAnimation(seed), animDelay: ((idx * 0.22) % 1.5).toFixed(2) + "s", fontSize: getEmojiSize(item.quantity) };
   });
+  const chairPad  = isMobile ? "1.2rem" : "2rem";
+  const chairSize = isMobile ? "1.3rem" : "1.8rem";
+  const tableW    = isMobile ? "min(260px, 72vw)" : "min(320px, 88vw)";
   return (
     <div style={{ display: "flex", flexDirection: "column", alignItems: "center", padding: "1rem 0 0.5rem" }}>
       <span style={{ fontFamily: "'Fredoka One', cursive", fontSize: "0.88rem", marginBottom: "0.7rem", background: "rgba(255,255,255,0.8)", padding: "3px 18px", borderRadius: 20, border: `1.5px solid ${theme.ring}`, color: "#5d4037", boxShadow: `0 0 10px ${theme.glow}`, letterSpacing: "0.06em" }}>
         🍽️ The Table
       </span>
-      <div style={{ position: "relative", width: "min(320px, 88vw)", height: "min(320px, 88vw)", borderRadius: "50%", background: theme.bg, boxShadow: `0 0 0 7px ${theme.ring}, 0 0 50px ${theme.glow}, 0 14px 45px rgba(0,0,0,0.32), inset 0 4px 24px rgba(255,255,255,0.08)`, display: "flex", alignItems: "center", justifyContent: "center", overflow: "hidden" }}>
-        {/* dashed inner ring */}
-        <div style={{ position: "absolute", inset: 14, borderRadius: "50%", border: "2px dashed rgba(255,255,255,0.15)", pointerEvents: "none" }} />
-        {/* highlight gleam */}
-        <div style={{ position: "absolute", top: "8%", left: "20%", width: "55%", height: "28%", borderRadius: "50%", background: "radial-gradient(ellipse, rgba(255,255,255,0.14) 0%, transparent 70%)", pointerEvents: "none" }} />
-        {isEmpty ? (
-          <div style={{ textAlign: "center", color: "rgba(255,255,255,0.55)", fontFamily: "'Nunito', sans-serif", fontSize: "0.88rem", padding: "1rem", zIndex: 1 }}>
-            <div style={{ fontSize: "2.5rem", marginBottom: 6 }}>🍽️</div>
-            <p style={{ margin: 0 }}>Add your dish below!</p>
-          </div>
-        ) : (
-          <div style={{ display: "flex", flexWrap: "wrap", justifyContent: "center", alignItems: "center", gap: "0.3rem", padding: "1.6rem", maxWidth: "100%", maxHeight: "100%", overflow: "hidden", zIndex: 1, position: "relative" }}>
-            {tableItems.map((item) => (
-              <span key={item.id} title={`${item.itemName} ×${item.quantity} — by ${item.bringerName}`}
-                style={{ fontSize: item.fontSize, display: "inline-block", cursor: "default", animationName: item.animName, animationDuration: ANIM_DURATIONS[item.animName], animationTimingFunction: "ease-in-out", animationIterationCount: "infinite", animationDelay: item.animDelay, filter: "drop-shadow(0 3px 7px rgba(0,0,0,0.4))", lineHeight: 1 }}>
-                {item.emoji}
-              </span>
-            ))}
-          </div>
-        )}
+      {/* Chair + table wrapper */}
+      <div style={{ position: "relative", padding: chairPad, display: "inline-block" }}>
+        {/* 6 chairs at N / NE / SE / S / SW / NW */}
+        {[
+          { top: 0,     left: "50%",  transform: "translateX(-50%)" },
+          { top: "12%", right: 0 },
+          { bottom: "12%", right: 0 },
+          { bottom: 0,  left: "50%",  transform: "translateX(-50%)" },
+          { bottom: "12%", left: 0 },
+          { top: "12%", left: 0 },
+        ].map((pos, i) => (
+          <span key={i} style={{ position: "absolute", fontSize: chairSize, pointerEvents: "none", userSelect: "none", ...pos }}>🪑</span>
+        ))}
+        <div style={{ position: "relative", width: tableW, height: tableW, borderRadius: "50%", background: theme.bg, boxShadow: `0 0 0 7px ${theme.ring}, 0 0 50px ${theme.glow}, 0 14px 45px rgba(0,0,0,0.22), inset 0 4px 24px rgba(255,255,255,0.12)`, display: "flex", alignItems: "center", justifyContent: "center", overflow: "hidden" }}>
+          {/* dashed inner ring */}
+          <div style={{ position: "absolute", inset: 14, borderRadius: "50%", border: "2px dashed rgba(255,255,255,0.2)", pointerEvents: "none" }} />
+          {/* highlight gleam */}
+          <div style={{ position: "absolute", top: "8%", left: "20%", width: "55%", height: "28%", borderRadius: "50%", background: "radial-gradient(ellipse, rgba(255,255,255,0.18) 0%, transparent 70%)", pointerEvents: "none" }} />
+          {isEmpty ? (
+            <div style={{ textAlign: "center", color: "rgba(0,0,0,0.4)", fontFamily: "'Nunito', sans-serif", fontSize: "0.88rem", padding: "1rem", zIndex: 1 }}>
+              <div style={{ fontSize: "2.5rem", marginBottom: 6 }}>🍽️</div>
+              <p style={{ margin: 0 }}>Add your dish below!</p>
+            </div>
+          ) : (
+            <div style={{ display: "flex", flexWrap: "wrap", justifyContent: "center", alignItems: "center", gap: "0.3rem", padding: "1.6rem", maxWidth: "100%", maxHeight: "100%", overflow: "hidden", zIndex: 1, position: "relative" }}>
+              {tableItems.map((item) => (
+                <span key={item.id} title={`${item.itemName} ×${item.quantity} — by ${item.bringerName}`}
+                  style={{ fontSize: item.fontSize, display: "inline-block", cursor: "default", animationName: item.animName, animationDuration: ANIM_DURATIONS[item.animName], animationTimingFunction: "ease-in-out", animationIterationCount: "infinite", animationDelay: item.animDelay, filter: "drop-shadow(0 3px 7px rgba(0,0,0,0.25))", lineHeight: 1 }}>
+                  {item.emoji}
+                </span>
+              ))}
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
@@ -501,7 +552,7 @@ function ItemList({ items }) {
 function EventScreen({ event, userName, onAddItem, onBack }) {
   const [shareOpen, setShareOpen] = useState(false);
   const [copied, setCopied]       = useState(false);
-  const shareUrl = `${window.location.href.split("?")[0]}?event=${event.id}`;
+  const shareUrl = `${window.location.href.split("?")[0].replace(/\/index\.html$/, "")}?event=${event.id}`;
   const theme    = getTableTheme(event.name, event.mealType);
 
   const copyLink = () => {
@@ -509,7 +560,7 @@ function EventScreen({ event, userName, onAddItem, onBack }) {
   };
 
   const mealLabel = MEAL_TYPES.find((m) => m.value === event.mealType)?.label || "";
-  const fmtDate   = (d) => { try { return new Date(d + "T00:00:00").toLocaleDateString("en-US", { weekday: "long", year: "numeric", month: "long", day: "numeric" }); } catch { return d; } };
+  const fmtDate   = (d) => { try { return new Date(d + "T00:00:00").toLocaleDateString("en-US", { month: "numeric", day: "numeric", year: "2-digit" }); } catch { return d; } };
   const fmtTime   = (t) => TIME_OPTIONS.find((o) => o.value === t)?.label || t;
 
   return (
