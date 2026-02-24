@@ -1,5 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import homeBg from "./src/homebackground.png";
+import { db } from "./src/firebase.js";
+import { ref, set, get, onValue, remove } from "firebase/database";
 
 // ── Mobile hook ───────────────────────────────────────────────────────────────
 const useIsMobile = () => {
@@ -246,14 +248,12 @@ const TIME_OPTIONS = (() => {
 
 // ── Storage ───────────────────────────────────────────────────────────────────
 const generateId = () => Math.random().toString(36).substr(2, 9);
-const EVENTS_KEY   = "potluckpal_events_v2";
+
+// Events live in Firebase Realtime Database — shared across all devices.
+// userMap (which events a user has joined) stays in localStorage — device-local preference.
 const USER_MAP_KEY = "potluckpal_usermap_v2";
-function loadData(key) {
-  try { const r = localStorage.getItem(key); return r ? JSON.parse(r) : {}; } catch { return {}; }
-}
-function saveData(key, data) {
-  try { localStorage.setItem(key, JSON.stringify(data)); } catch {}
-}
+function loadUserMap() { try { return JSON.parse(localStorage.getItem(USER_MAP_KEY) || "{}"); } catch { return {}; } }
+function saveUserMap(data) { try { localStorage.setItem(USER_MAP_KEY, JSON.stringify(data)); } catch {} }
 
 // ── Shared UI ─────────────────────────────────────────────────────────────────
 const fieldBase = { width: "100%", padding: "0.6rem 0.9rem", borderRadius: 8, border: "1.5px solid #e0f2f1", fontFamily: "'Nunito', sans-serif", fontSize: "0.95rem", outline: "none", background: "rgba(255,255,255,0.9)", color: "#5d4e37", boxSizing: "border-box" };
@@ -350,16 +350,31 @@ function HomeScreen({ onCreateEvent, onJoinEvent, onViewHistory }) {
 }
 
 // ── History Screen ────────────────────────────────────────────────────────────
-function HistoryScreen({ userName, events, userMap, onDelete, onOpen, onBack }) {
-  const key = userName.trim().toLowerCase();
-  const myEvents = ((userMap[key] || []).filter((id) => events[id])).map((id) => events[id]).sort((a, b) => b.createdAt - a.createdAt);
+function HistoryScreen({ userName, userMap, onDelete, onOpen, onBack }) {
+  const [myEvents, setMyEvents] = useState([]);
+  const [fetching, setFetching] = useState(true);
+
+  useEffect(() => {
+    const key = userName.trim().toLowerCase();
+    const ids = userMap[key] || [];
+    if (!ids.length) { setFetching(false); return; }
+    Promise.all(ids.map((id) => get(ref(db, `events/${id}`)))).then((snaps) => {
+      setMyEvents(
+        snaps.filter((s) => s.exists()).map((s) => s.val()).sort((a, b) => b.createdAt - a.createdAt)
+      );
+      setFetching(false);
+    });
+  }, [userName, userMap]);
+
   const fmtDate = (d) => { try { return new Date(d + "T00:00:00").toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric", year: "numeric" }); } catch { return d; } };
   return (
     <div style={{ maxWidth: 560, margin: "0 auto", paddingTop: "1.5rem" }}>
       <Button variant="ghost" onClick={onBack} style={{ marginBottom: "0.8rem" }}>← Back</Button>
       <Card>
         <h2 style={{ fontFamily: "'Fredoka One', cursive", fontStyle: "italic", color: "#5d4e37", marginTop: 0, fontSize: "1.6rem" }}>📖 {userName}'s Events</h2>
-        {myEvents.length === 0 ? (
+        {fetching ? (
+          <p style={{ fontFamily: "'Nunito', sans-serif", color: "#a8caba", textAlign: "center", padding: "1.5rem 0" }}>Loading…</p>
+        ) : myEvents.length === 0 ? (
           <p style={{ fontFamily: "'Nunito', sans-serif", fontStyle: "italic", color: "#a8caba", textAlign: "center", padding: "1.5rem 0" }}>No events found for <strong>{userName}</strong>.<br /><span style={{ fontSize: "0.85rem" }}>Events link to you when you create them or add a dish.</span></p>
         ) : (
           <div style={{ display: "flex", flexDirection: "column", gap: "0.8rem" }}>
@@ -615,67 +630,86 @@ function EventScreen({ event, userName, onAddItem, onBack }) {
 export default function App() {
   const isMobile = useIsMobile();
   const [screen, setScreen]                 = useState("home");
-  const [events, setEvents]                 = useState({});
-  const [userMap, setUserMap]               = useState({});
+  const [currentEvent, setCurrentEvent]     = useState(null);
+  const [userMap, setUserMap]               = useState(() => loadUserMap());
   const [currentEventId, setCurrentEventId] = useState(null);
   const [userName, setUserName]             = useState("");
   const [historyUser, setHistoryUser]       = useState("");
-  const [loading, setLoading]               = useState(true);
   const [scrollY, setScrollY]               = useState(0);
 
+  // Check URL for ?event=ID on mount
   useEffect(() => {
-    const ev = loadData(EVENTS_KEY);
-    const um = loadData(USER_MAP_KEY);
-    setEvents(ev); setUserMap(um); setLoading(false);
     const eid = new URLSearchParams(window.location.search).get("event");
-    if (eid && ev[eid]) { setCurrentEventId(eid); setScreen("event-join"); }
+    if (eid) { setCurrentEventId(eid); setScreen("event-join"); }
   }, []);
+
+  // Real-time listener: whenever currentEventId changes, subscribe to that event in Firebase
+  useEffect(() => {
+    if (!currentEventId) return;
+    const unsub = onValue(ref(db, `events/${currentEventId}`), (snap) => {
+      if (snap.exists()) setCurrentEvent(snap.val());
+    });
+    return () => unsub();
+  }, [currentEventId]);
 
   useEffect(() => {
     const handleScroll = () => setScrollY(window.scrollY);
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  const persistEvents  = useCallback((ne) => { setEvents(ne);  saveData(EVENTS_KEY, ne);   }, []);
-  const persistUserMap = useCallback((nm) => { setUserMap(nm); saveData(USER_MAP_KEY, nm); }, []);
-
-  const registerUserEvent = useCallback((name, eventId, currentMap) => {
+  const registerUserEvent = useCallback((name, eventId) => {
     const key = name.trim().toLowerCase();
-    const ids = currentMap[key] || [];
-    if (ids.includes(eventId)) return currentMap;
-    const updated = { ...currentMap, [key]: [...ids, eventId] };
-    persistUserMap(updated);
-    return updated;
-  }, [persistUserMap]);
+    setUserMap((prev) => {
+      if ((prev[key] || []).includes(eventId)) return prev;
+      const updated = { ...prev, [key]: [...(prev[key] || []), eventId] };
+      saveUserMap(updated);
+      return updated;
+    });
+  }, []);
 
-  const handleCreateEvent = useCallback((form) => {
+  const handleCreateEvent = useCallback(async (form) => {
     const id = generateId();
-    persistEvents({ ...events, [id]: { id, ...form, createdBy: userName, items: [], createdAt: Date.now() } });
-    registerUserEvent(userName, id, userMap);
-    setCurrentEventId(id); setScreen("event");
-  }, [events, userMap, userName, persistEvents, registerUserEvent]);
+    const newEvent = { id, ...form, createdBy: userName, items: [], createdAt: Date.now() };
+    await set(ref(db, `events/${id}`), newEvent);
+    registerUserEvent(userName, id);
+    setCurrentEventId(id);
+    setScreen("event");
+  }, [userName, registerUserEvent]);
 
-  const handleJoinEvent = useCallback((id, name) => {
+  const handleJoinEvent = useCallback(async (id, name) => {
     setUserName(name);
-    if (events[id]) { registerUserEvent(name, id, userMap); setCurrentEventId(id); setScreen("event"); }
-    else { alert("Event not found. Please check the link or ID."); }
-  }, [events, userMap, registerUserEvent]);
+    const snap = await get(ref(db, `events/${id}`));
+    if (snap.exists()) {
+      registerUserEvent(name, id);
+      setCurrentEventId(id);
+      setScreen("event");
+    } else {
+      alert("Event not found. Please check the link or ID.");
+    }
+  }, [registerUserEvent]);
 
-  const handleAddItem = useCallback((eventId, item, bringer) => {
+  const handleAddItem = useCallback(async (eventId, item, bringer) => {
     const newItem = { id: generateId(), itemName: item.itemName, quantity: item.quantity, bringerName: bringer, emoji: getFoodEmoji(item.itemName), addedAt: Date.now() };
-    persistEvents({ ...events, [eventId]: { ...events[eventId], items: [...(events[eventId].items || []), newItem] } });
-    registerUserEvent(bringer, eventId, userMap);
-  }, [events, userMap, persistEvents, registerUserEvent]);
+    const itemsRef = ref(db, `events/${eventId}/items`);
+    const snap = await get(itemsRef);
+    const current = snap.val() || [];
+    await set(itemsRef, [...current, newItem]);
+    registerUserEvent(bringer, eventId);
+  }, [registerUserEvent]);
 
-  const handleDeleteEvent = useCallback((eventId) => {
-    const updatedEvents = { ...events }; delete updatedEvents[eventId]; persistEvents(updatedEvents);
-    const updatedMap = {};
-    for (const [k, ids] of Object.entries(userMap)) { const f = ids.filter((id) => id !== eventId); if (f.length) updatedMap[k] = f; }
-    persistUserMap(updatedMap);
-  }, [events, userMap, persistEvents, persistUserMap]);
-
-  if (loading) return <div style={{ textAlign: "center", paddingTop: "5rem", fontFamily: "'Fredoka One', cursive", color: "#5d4e37", fontSize: "2rem" }}>🤝 Loading Potluck Pal...</div>;
+  const handleDeleteEvent = useCallback(async (eventId) => {
+    await remove(ref(db, `events/${eventId}`));
+    setUserMap((prev) => {
+      const updated = {};
+      for (const [k, ids] of Object.entries(prev)) {
+        const f = ids.filter((id) => id !== eventId);
+        if (f.length) updated[k] = f;
+      }
+      saveUserMap(updated);
+      return updated;
+    });
+  }, []);
 
   return (
     <>
@@ -696,19 +730,24 @@ export default function App() {
         <Blob style={{ width: 250, height: 250, background: "#fce4ec", top: -100, left: -150, opacity: 0.3, transform: `translateY(${scrollY * 0.1}px)` }} />
         <Blob style={{ width: 200, height: 200, background: "#f3e5f5", bottom: -80, right: -100, opacity: 0.3, transform: `translateY(${scrollY * -0.15}px)` }} />
         <Blob style={{ width: 180, height: 180, background: "#e0f2f1", top: "40%", right: "10%", opacity: 0.3, transform: `translateY(${scrollY * 0.2}px)` }} />
-        {screen !== "home" && <div style={{ background: "rgba(255,255,255,0.7)", backdropFilter: "blur(8px)", borderBottom: "1.5px solid rgba(224,242,241,0.4)", padding: isMobile ? "0.6rem 1rem" : "1rem 2rem", display: "flex", alignItems: "center", gap: "0.5rem", justifyContent: "center" }}>
-          <span style={{ fontSize: isMobile ? "1.5rem" : "2rem" }}>🥟</span>
-          <span style={{ fontFamily: "'Fredoka One', cursive", color: "#ff6a00", fontSize: "clamp(1.4rem, 5vw, 2.5rem)", textShadow: "2px 2px 0 #fff, 0 0 20px rgba(255,120,0,0.4)" }}>Potluck Pal</span>
-          {userName && <span style={{ fontFamily: "'Nunito', sans-serif", fontStyle: "italic", color: "#5d4e37", fontSize: isMobile ? "0.8rem" : "1rem", marginLeft: "auto" }}>Hi, {userName}! 👋</span>}
-        </div>}
+        {screen !== "home" && screen !== "event-join" && (
+          <div style={{ background: "rgba(255,255,255,0.7)", backdropFilter: "blur(8px)", borderBottom: "1.5px solid rgba(224,242,241,0.4)", padding: isMobile ? "0.6rem 1rem" : "1rem 2rem", display: "flex", alignItems: "center", gap: "0.5rem", justifyContent: "center" }}>
+            <span style={{ fontSize: isMobile ? "1.5rem" : "2rem" }}>🥟</span>
+            <span style={{ fontFamily: "'Fredoka One', cursive", color: "#ff6a00", fontSize: "clamp(1.4rem, 5vw, 2.5rem)", textShadow: "2px 2px 0 #fff, 0 0 20px rgba(255,120,0,0.4)" }}>Potluck Pal</span>
+            {userName && <span style={{ fontFamily: "'Nunito', sans-serif", fontStyle: "italic", color: "#5d4e37", fontSize: isMobile ? "0.8rem" : "1rem", marginLeft: "auto" }}>Hi, {userName}! 👋</span>}
+          </div>
+        )}
         <div style={{ padding: isMobile ? "1rem" : "2rem", maxWidth: "800px", margin: "0 auto" }}>
           {(screen === "home" || screen === "event-join") && (
             <HomeScreen onCreateEvent={(n) => { setUserName(n); setScreen("create"); }} onJoinEvent={handleJoinEvent} onViewHistory={(n) => { setHistoryUser(n); setUserName(n); setScreen("history"); }} />
           )}
           {screen === "create" && <CreateEventScreen userName={userName} onCreate={handleCreateEvent} onBack={() => setScreen("home")} />}
-          {screen === "history" && <HistoryScreen userName={historyUser} events={events} userMap={userMap} onDelete={handleDeleteEvent} onOpen={(id) => { setCurrentEventId(id); setScreen("event"); }} onBack={() => setScreen("home")} />}
-          {screen === "event" && currentEventId && events[currentEventId] && (
-            <EventScreen event={events[currentEventId]} userName={userName} onAddItem={handleAddItem} onBack={() => setScreen("home")} />
+          {screen === "history" && <HistoryScreen userName={historyUser} userMap={userMap} onDelete={handleDeleteEvent} onOpen={(id) => { setCurrentEventId(id); setScreen("event"); }} onBack={() => setScreen("home")} />}
+          {screen === "event" && currentEventId && currentEvent && (
+            <EventScreen event={currentEvent} userName={userName} onAddItem={handleAddItem} onBack={() => setScreen("home")} />
+          )}
+          {screen === "event" && currentEventId && !currentEvent && (
+            <div style={{ textAlign: "center", paddingTop: "5rem", fontFamily: "'Fredoka One', cursive", color: "#5d4e37", fontSize: "1.6rem" }}>🍽️ Loading event…</div>
           )}
         </div>
       </div>
