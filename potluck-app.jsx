@@ -214,13 +214,13 @@ const ANIM_DURATIONS = { float: "3s", wobble: "1.8s", "spin-slow": "7s", "bounce
 
 const getItemAnimation = (seed) => ANIM_POOL[Math.abs(seed) % ANIM_POOL.length];
 
-// Emoji font-size scales with quantity: 1→1.9rem, 2→2.3rem, 3→2.7rem, 4→3.1rem, 5+→3.6rem
+// Emoji font-size scales prominently with quantity: 1→1.5rem, 2→2.2rem, 3→3.0rem, 4→3.8rem, 5+→4.8rem
 const getEmojiSize = (qty) => {
-  if (qty >= 5) return "3.6rem";
-  if (qty >= 4) return "3.1rem";
-  if (qty >= 3) return "2.7rem";
-  if (qty >= 2) return "2.3rem";
-  return "1.9rem";
+  if (qty >= 5) return "4.8rem";
+  if (qty >= 4) return "3.8rem";
+  if (qty >= 3) return "3.0rem";
+  if (qty >= 2) return "2.2rem";
+  return "1.5rem";
 };
 
 // ── Meal types & times ────────────────────────────────────────────────────────
@@ -426,40 +426,48 @@ function CreateEventScreen({ userName, onCreate, onBack }) {
 }
 
 // ── Round Potluck Table ───────────────────────────────────────────────────────
-function PotluckTable({ items, eventName, mealType }) {
-  const theme    = getTableTheme(eventName, mealType);
+function PotluckTable({ items, attendees }) {
   const isMobile = useIsMobile();
   const isEmpty  = items.length === 0;
   const tableItems = items.map((item, idx) => {
     const seed = item.id.split("").reduce((acc, c) => acc + c.charCodeAt(0), 0) + idx;
     return { ...item, animName: getItemAnimation(seed), animDelay: ((idx * 0.22) % 1.5).toFixed(2) + "s", fontSize: getEmojiSize(item.quantity) };
   });
-  const chairPad  = isMobile ? "1.2rem" : "2rem";
-  const chairSize = isMobile ? "1.3rem" : "1.8rem";
-  const tableW    = isMobile ? "min(260px, 72vw)" : "min(320px, 88vw)";
+
+  const stoolCount = Math.min(12, Math.max(1, parseInt(attendees) || 6));
+  const stoolSize  = isMobile ? 18 : 26; // px — circular wooden stool tops
+  const chairPad   = isMobile ? "1.5rem" : "2.2rem";
+  const tableW     = isMobile ? "min(260px, 72vw)" : "min(320px, 88vw)";
+  const woodBg     = "radial-gradient(circle at 38% 32%, #f5e6c8 0%, #e0c080 25%, #c89848 55%, #a87030 80%, #8b5a20 100%)";
+
+  // Stools evenly distributed around the circle using trig (r=46% of wrapper half)
+  const stoolPositions = Array.from({ length: stoolCount }, (_, i) => {
+    const angle = (i * 360 / stoolCount - 90) * (Math.PI / 180);
+    return {
+      top:       `${50 + 46 * Math.sin(angle)}%`,
+      left:      `${50 + 46 * Math.cos(angle)}%`,
+      transform: "translate(-50%, -50%)",
+    };
+  });
+
   return (
     <div style={{ display: "flex", flexDirection: "column", alignItems: "center", padding: "1rem 0 0.5rem" }}>
-      <span style={{ fontFamily: "'Fredoka One', cursive", fontSize: "0.88rem", marginBottom: "0.7rem", background: "rgba(255,255,255,0.8)", padding: "3px 18px", borderRadius: 20, border: `1.5px solid ${theme.ring}`, color: "#5d4037", boxShadow: `0 0 10px ${theme.glow}`, letterSpacing: "0.06em" }}>
+      <span style={{ fontFamily: "'Fredoka One', cursive", fontSize: "0.88rem", marginBottom: "0.7rem", background: "rgba(255,255,255,0.8)", padding: "3px 18px", borderRadius: 20, border: "1.5px solid #c4965a", color: "#5d4037", letterSpacing: "0.06em" }}>
         🍽️ The Table
       </span>
-      {/* Chair + table wrapper */}
+      {/* Stool + table wrapper */}
       <div style={{ position: "relative", padding: chairPad, display: "inline-block" }}>
-        {/* 6 chairs at N / NE / SE / S / SW / NW */}
-        {[
-          { top: 0,     left: "50%",  transform: "translateX(-50%)" },
-          { top: "12%", right: 0 },
-          { bottom: "12%", right: 0 },
-          { bottom: 0,  left: "50%",  transform: "translateX(-50%)" },
-          { bottom: "12%", left: 0 },
-          { top: "12%", left: 0 },
-        ].map((pos, i) => (
-          <span key={i} style={{ position: "absolute", fontSize: chairSize, pointerEvents: "none", userSelect: "none", ...pos }}>🪑</span>
+        {stoolPositions.map((pos, i) => (
+          <div key={i} style={{ position: "absolute", width: stoolSize, height: stoolSize, borderRadius: "50%", background: "radial-gradient(circle at 35% 30%, #d4a870 0%, #a06828 60%, #7a4a14 100%)", border: "2px solid #5c3008", boxShadow: "0 2px 6px rgba(0,0,0,0.40)", pointerEvents: "none", ...pos }} />
         ))}
-        <div style={{ position: "relative", width: tableW, height: tableW, borderRadius: "50%", background: theme.bg, boxShadow: `0 0 0 7px ${theme.ring}, 0 0 50px ${theme.glow}, 0 14px 45px rgba(0,0,0,0.22), inset 0 4px 24px rgba(255,255,255,0.12)`, display: "flex", alignItems: "center", justifyContent: "center", overflow: "hidden" }}>
-          {/* dashed inner ring */}
-          <div style={{ position: "absolute", inset: 14, borderRadius: "50%", border: "2px dashed rgba(255,255,255,0.2)", pointerEvents: "none" }} />
-          {/* highlight gleam */}
-          <div style={{ position: "absolute", top: "8%", left: "20%", width: "55%", height: "28%", borderRadius: "50%", background: "radial-gradient(ellipse, rgba(255,255,255,0.18) 0%, transparent 70%)", pointerEvents: "none" }} />
+        <div style={{ position: "relative", width: tableW, height: tableW, borderRadius: "50%", background: woodBg, boxShadow: "0 0 0 9px #7a4e10, 0 0 0 14px #c4965a, 0 14px 45px rgba(0,0,0,0.30), inset 0 4px 24px rgba(255,255,255,0.10)", display: "flex", alignItems: "center", justifyContent: "center", overflow: "hidden" }}>
+          {/* Wood grain rings */}
+          <div style={{ position: "absolute", inset: "7%",  borderRadius: "50%", border: "1px solid rgba(90,50,10,0.20)", pointerEvents: "none" }} />
+          <div style={{ position: "absolute", inset: "18%", borderRadius: "50%", border: "1px solid rgba(90,50,10,0.18)", pointerEvents: "none" }} />
+          <div style={{ position: "absolute", inset: "31%", borderRadius: "50%", border: "1px solid rgba(90,50,10,0.15)", pointerEvents: "none" }} />
+          <div style={{ position: "absolute", inset: "45%", borderRadius: "50%", border: "1px solid rgba(90,50,10,0.12)", pointerEvents: "none" }} />
+          {/* Highlight gleam */}
+          <div style={{ position: "absolute", top: "8%", left: "20%", width: "55%", height: "28%", borderRadius: "50%", background: "radial-gradient(ellipse, rgba(255,255,255,0.22) 0%, transparent 70%)", pointerEvents: "none" }} />
           {isEmpty ? (
             <div style={{ textAlign: "center", color: "rgba(0,0,0,0.4)", fontFamily: "'Nunito', sans-serif", fontSize: "0.88rem", padding: "1rem", zIndex: 1 }}>
               <div style={{ fontSize: "2.5rem", marginBottom: 6 }}>🍽️</div>
@@ -567,40 +575,36 @@ function EventScreen({ event, userName, onAddItem, onBack }) {
     <div style={{ maxWidth: 600, margin: "0 auto", paddingTop: "1.2rem" }}>
       <Button variant="ghost" onClick={onBack} style={{ marginBottom: "0.8rem" }}>← Home</Button>
       <Card style={{ marginBottom: "1.2rem" }}>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: "0.5rem" }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: "0.5rem", marginBottom: shareOpen ? "0.75rem" : 0 }}>
           <div>
-            <h2 style={{ fontFamily: "'Fredoka One', cursive", fontStyle: "italic", color: "#5d4e37", marginTop: 0, fontSize: "clamp(1.3rem, 5vw, 1.8rem)" }}>🎊 {event.name}</h2>
-            {mealLabel && <p style={{ fontFamily: "'Nunito', sans-serif", fontStyle: "italic", color: "#5d4e37", margin: "4px 0", fontSize: "0.92rem" }}>🍴 {mealLabel}</p>}
-            <p style={{ fontFamily: "'Nunito', sans-serif", fontStyle: "italic", color: "#5d4e37", margin: "4px 0", fontSize: "0.92rem" }}>📅 {fmtDate(event.date)} at {fmtTime(event.time)}</p>
-            <p style={{ fontFamily: "'Nunito', sans-serif", fontStyle: "italic", color: "#5d4e37", margin: "4px 0", fontSize: "0.92rem" }}>📍 {event.location}</p>
-            <p style={{ fontFamily: "'Nunito', sans-serif", fontStyle: "italic", color: "#5d4e37", margin: "4px 0", fontSize: "0.92rem" }}>👥 {event.attendees} guests</p>
+            <h2 style={{ fontFamily: "'Fredoka One', cursive", color: "#5d4e37", marginTop: 0, fontSize: "clamp(1.45rem, 5vw, 1.9rem)" }}>🎊 {event.name}</h2>
+            {mealLabel && <p style={{ fontFamily: "'Nunito', sans-serif", color: "#5d4e37", margin: "4px 0", fontSize: "1rem" }}>🍴 {mealLabel}</p>}
+            <p style={{ fontFamily: "'Nunito', sans-serif", color: "#5d4e37", margin: "4px 0", fontSize: "1rem" }}>📅 {fmtDate(event.date)} at {fmtTime(event.time)}</p>
+            <p style={{ fontFamily: "'Nunito', sans-serif", color: "#5d4e37", margin: "4px 0", fontSize: "1rem" }}>📍 {event.location}</p>
+            <p style={{ fontFamily: "'Nunito', sans-serif", color: "#5d4e37", margin: "4px 0", fontSize: "1rem" }}>👥 {event.attendees} guests</p>
           </div>
-
-          {/* Share panel */}
-          <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: "0.5rem", flexShrink: 0 }}>
-            <Button onClick={() => setShareOpen((o) => !o)} variant="secondary">
-              {shareOpen ? "✕ Close" : "🔗 Share Link"}
-            </Button>
-            {shareOpen && (
-              <div style={{ background: "rgba(255,250,245,0.98)", border: `2px solid ${theme.ring}`, borderRadius: 16, padding: "0.85rem 1rem", boxShadow: `0 6px 28px ${theme.glow}`, minWidth: 0, width: "min(360px, calc(100vw - 3rem))", animation: "popIn 0.25s cubic-bezier(0.34,1.56,0.64,1)" }}>
-                <p style={{ fontFamily: "'Fredoka One', cursive", fontStyle: "italic", color: "#5d4e37", fontSize: "0.88rem", margin: "0 0 0.5rem" }}>🔗 Share with your guests:</p>
-                <div style={{ background: "rgba(255,255,255,0.95)", border: "1.5px solid #ffccbc", borderRadius: 10, padding: "0.45rem 0.7rem", display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "0.5rem" }}>
-                  <span style={{ fontFamily: "monospace", fontSize: "0.72rem", color: "#5d4037", flex: 1, overflowX: "auto", whiteSpace: "nowrap", userSelect: "all", lineHeight: 1.4 }}>
-                    {shareUrl}
-                  </span>
-                  <button onClick={copyLink}
-                    style={{ flexShrink: 0, border: "none", borderRadius: 8, padding: "4px 10px", cursor: "pointer", fontFamily: "'Fredoka One', cursive", fontSize: "0.78rem", background: copied ? "#c8e6c9" : "#fff3e0", color: copied ? "#2e7d32" : "#e65100", transition: "background 0.2s, color 0.2s", whiteSpace: "nowrap" }}>
-                    {copied ? "✅ Copied!" : "Copy"}
-                  </button>
-                </div>
-                <p style={{ fontFamily: "'Nunito', sans-serif", color: "#a1887f", fontSize: "0.72rem", margin: 0 }}>Anyone with this link can view and add dishes to the event.</p>
-              </div>
-            )}
-          </div>
+          <Button onClick={() => setShareOpen((o) => !o)} variant="secondary" style={{ padding: "0.4rem 0.8rem", fontSize: "0.82rem" }}>
+            {shareOpen ? "✕ Close" : "🔗 Share Link"}
+          </Button>
         </div>
+        {shareOpen && (
+          <div style={{ width: "100%", background: "rgba(255,250,245,0.98)", border: `2px solid ${theme.ring}`, borderRadius: 16, padding: "0.85rem 1rem", animation: "popIn 0.25s cubic-bezier(0.34,1.56,0.64,1)" }}>
+            <p style={{ fontFamily: "'Fredoka One', cursive", color: "#5d4e37", fontSize: "0.92rem", margin: "0 0 0.5rem" }}>🔗 Share with your guests:</p>
+            <div style={{ background: "rgba(255,255,255,0.95)", border: "1.5px solid #ffccbc", borderRadius: 10, padding: "0.45rem 0.7rem", display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "0.5rem" }}>
+              <span style={{ fontFamily: "monospace", fontSize: "0.72rem", color: "#5d4037", flex: 1, overflowX: "auto", whiteSpace: "nowrap", userSelect: "all", lineHeight: 1.4 }}>
+                {shareUrl}
+              </span>
+              <button onClick={copyLink}
+                style={{ flexShrink: 0, border: "none", borderRadius: 8, padding: "4px 10px", cursor: "pointer", fontFamily: "'Fredoka One', cursive", fontSize: "0.78rem", background: copied ? "#c8e6c9" : "#fff3e0", color: copied ? "#2e7d32" : "#e65100", transition: "background 0.2s, color 0.2s", whiteSpace: "nowrap" }}>
+                {copied ? "✅ Copied!" : "Copy"}
+              </button>
+            </div>
+            <p style={{ fontFamily: "'Nunito', sans-serif", color: "#a1887f", fontSize: "0.72rem", margin: 0 }}>Anyone with this link can view and add dishes to the event.</p>
+          </div>
+        )}
       </Card>
 
-      <PotluckTable items={event.items || []} eventName={event.name} mealType={event.mealType} />
+      <PotluckTable items={event.items || []} eventName={event.name} mealType={event.mealType} attendees={event.attendees} />
       <AddItemForm userName={userName} onAdd={(item) => onAddItem(event.id, item, userName)} eventName={event.name} mealType={event.mealType} />
       <ItemList items={event.items || []} />
     </div>
