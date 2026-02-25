@@ -408,9 +408,6 @@ function CreateEventScreen({ userName, onCreate, onBack }) {
   const [form, setForm] = useState({ name: "", mealType: "", date: "", time: "", location: "", attendees: "" });
   const set   = (k) => (v) => setForm((f) => ({ ...f, [k]: v }));
   const valid = form.name.trim() && form.mealType && form.date && form.time && form.location.trim() && Number(form.attendees) > 0;
-  const recs  = getEventRecommendations(form.name, form.mealType);
-  const theme = getTableTheme(form.name, form.mealType);
-  const showPreview = form.name.trim().length > 1 || form.mealType;
   return (
     <div style={{ maxWidth: 560, margin: "0 auto", paddingTop: "1.5rem" }}>
       <Button variant="ghost" onClick={onBack} style={{ marginBottom: "1rem" }}>← Back</Button>
@@ -423,17 +420,6 @@ function CreateEventScreen({ userName, onCreate, onBack }) {
         <Select label="Time" value={form.time} onChange={set("time")} options={TIME_OPTIONS} required placeholder="— Choose a time —" />
         <Input label="Location" value={form.location} onChange={set("location")} placeholder="e.g. Grandma's Backyard" required />
         <Input label="Number of Guests" value={form.attendees} onChange={set("attendees")} type="number" placeholder="e.g. 12" required />
-        {showPreview && (
-          <div style={{ marginBottom: "1rem", borderRadius: 14, overflow: "hidden", border: `2px solid ${theme.ring}`, boxShadow: `0 0 16px ${theme.glow}` }}>
-            <div style={{ background: theme.bg, padding: "0.65rem 1rem", display: "flex", alignItems: "center", gap: "0.6rem" }}>
-              <div style={{ width: 20, height: 20, borderRadius: "50%", background: "rgba(255,255,255,0.2)", border: `2px solid ${theme.ring}`, flexShrink: 0 }} />
-              <span style={{ fontFamily: "'Fredoka One', cursive", color: theme.label, fontSize: "0.9rem" }}>✨ Suggested dishes for your event</span>
-            </div>
-            <div style={{ background: "rgba(255,252,248,0.97)", padding: "0.7rem 1rem", display: "flex", flexWrap: "wrap", gap: "0.35rem" }}>
-              {recs.map((r, i) => <span key={i} style={{ fontFamily: "'Nunito', sans-serif", fontSize: "0.8rem", background: "rgba(255,240,220,0.9)", border: "1px solid #ffe0b2", borderRadius: 20, padding: "3px 10px", color: "#5d4037" }}>{getFoodEmoji(r)} {r}</span>)}
-            </div>
-          </div>
-        )}
         <Button onClick={() => valid && onCreate(form)} disabled={!valid} style={{ width: "100%" }}>🚀 Create Event & Get Link</Button>
       </Card>
     </div>
@@ -488,16 +474,17 @@ function PotluckTable({ items, attendees }) {
               <div style={{ fontSize: "2.5rem", marginBottom: 6 }}>🍽️</div>
               <p style={{ margin: 0 }}>Add your dish below!</p>
             </div>
-          ) : (
-            <div style={{ display: "flex", flexWrap: "wrap", justifyContent: "center", alignItems: "center", gap: "0.3rem", padding: "1.6rem", maxWidth: "100%", maxHeight: "100%", overflow: "hidden", zIndex: 1, position: "relative" }}>
-              {tableItems.map((item) => (
-                <span key={item.id} title={`${item.itemName} ×${item.quantity} — by ${item.bringerName}`}
-                  style={{ fontSize: item.fontSize, display: "inline-block", cursor: "default", animationName: item.animName, animationDuration: ANIM_DURATIONS[item.animName], animationTimingFunction: "ease-in-out", animationIterationCount: "infinite", animationDelay: item.animDelay, filter: "drop-shadow(0 3px 7px rgba(0,0,0,0.25))", lineHeight: 1 }}>
-                  {item.emoji}
-                </span>
-              ))}
-            </div>
-          )}
+          ) : tableItems.map((item, i) => {
+            const angle = (i * 360 / tableItems.length - 90) * (Math.PI / 180);
+            const emojiSize = item.quantity >= 5 ? "2.4rem" : item.quantity >= 4 ? "2.0rem" : item.quantity >= 3 ? "1.7rem" : item.quantity >= 2 ? "1.4rem" : "1.2rem";
+            return (
+              <div key={item.id} title={`${item.itemName} ×${item.quantity} — by ${item.bringerName}`}
+                style={{ position: "absolute", top: `${50 + 32 * Math.sin(angle)}%`, left: `${50 + 32 * Math.cos(angle)}%`, transform: "translate(-50%, -50%)", display: "flex", flexDirection: "column", alignItems: "center", zIndex: 1, animationName: item.animName, animationDuration: ANIM_DURATIONS[item.animName], animationTimingFunction: "ease-in-out", animationIterationCount: "infinite", animationDelay: item.animDelay }}>
+                <span style={{ fontSize: emojiSize, display: "block", filter: "drop-shadow(0 2px 5px rgba(0,0,0,0.30))", lineHeight: 1 }}>{item.emoji}</span>
+                <span style={{ fontFamily: "'Fredoka One', cursive", fontSize: "0.55rem", color: "#fff", background: "rgba(70,35,0,0.55)", borderRadius: 6, padding: "1px 5px", marginTop: "2px", lineHeight: "1.4", whiteSpace: "nowrap" }}>×{item.quantity}</span>
+              </div>
+            );
+          })}
         </div>
       </div>
     </div>
