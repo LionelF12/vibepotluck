@@ -314,11 +314,11 @@ function Select({ label, value, onChange, options, required, placeholder = "— 
 }
 
 // ── Home Screen ───────────────────────────────────────────────────────────────
-function HomeScreen({ onCreateEvent, onJoinEvent, onViewHistory }) {
+function HomeScreen({ onCreateEvent, onJoinEvent, onViewHistory, initialJoinCode = "" }) {
   const isMobile = useIsMobile();
   const [name, setName]         = useState("");
   const [joinName, setJoinName] = useState("");
-  const [code, setCode]         = useState("");
+  const [code, setCode]         = useState(initialJoinCode);
   const [histName, setHistName] = useState("");
   return (
     <div style={{ maxWidth: 1200, margin: "0 auto", paddingTop: isMobile ? "1rem" : "2rem", paddingBottom: isMobile ? "1.5rem" : "3rem", paddingLeft: isMobile ? "0.5rem" : "1rem", paddingRight: isMobile ? "0.5rem" : "1rem", display: "flex", flexDirection: "column", gap: "1rem", justifyContent: "center", backgroundImage: `linear-gradient(rgba(255,245,235,0.55), rgba(255,245,235,0.55)), url(${homeBg})`, backgroundSize: "cover", backgroundPosition: "center", backgroundRepeat: "no-repeat", borderRadius: "20px", position: "relative" }}>
@@ -741,10 +741,10 @@ export default function App() {
         @keyframes popIn       { from{transform:scale(0)rotate(-15deg);opacity:0} to{transform:scale(1)rotate(0);opacity:1} }
         select option { font-family: 'Nunito', sans-serif; }
       `}</style>
-      <div style={{ minHeight: "100vh", background: "linear-gradient(135deg, #fce4ec 0%, #f3e5f5 50%, #e0f2f1 100%)", position: "relative", overflow: "hidden" }}>
-        <Blob style={{ width: 250, height: 250, background: "#fce4ec", top: -100, left: -150, opacity: 0.3, transform: `translateY(${scrollY * 0.1}px)` }} />
-        <Blob style={{ width: 200, height: 200, background: "#f3e5f5", bottom: -80, right: -100, opacity: 0.3, transform: `translateY(${scrollY * -0.15}px)` }} />
-        <Blob style={{ width: 180, height: 180, background: "#e0f2f1", top: "40%", right: "10%", opacity: 0.3, transform: `translateY(${scrollY * 0.2}px)` }} />
+      <div style={{ minHeight: "100vh", background: "linear-gradient(135deg, #ffe4e4 0%, #ffd0d0 50%, #ffbaba 100%)", position: "relative", overflow: "hidden" }}>
+        <Blob style={{ width: 250, height: 250, background: "#ffb3b3", top: -100, left: -150, opacity: 0.3, transform: `translateY(${scrollY * 0.1}px)` }} />
+        <Blob style={{ width: 200, height: 200, background: "#ffc8c8", bottom: -80, right: -100, opacity: 0.3, transform: `translateY(${scrollY * -0.15}px)` }} />
+        <Blob style={{ width: 180, height: 180, background: "#ffaaaa", top: "40%", right: "10%", opacity: 0.3, transform: `translateY(${scrollY * 0.2}px)` }} />
         {screen !== "home" && screen !== "event-join" && (
           <div style={{ background: "rgba(255,255,255,0.7)", backdropFilter: "blur(8px)", borderBottom: "1.5px solid rgba(224,242,241,0.4)", padding: isMobile ? "0.6rem 1rem" : "1rem 2rem", display: "flex", alignItems: "center", gap: "0.5rem", justifyContent: "center" }}>
             <span style={{ fontSize: isMobile ? "1.5rem" : "2rem" }}>🥟</span>
@@ -754,7 +754,7 @@ export default function App() {
         )}
         <div style={{ padding: isMobile ? "1rem" : "2rem", maxWidth: "800px", margin: "0 auto" }}>
           {(screen === "home" || screen === "event-join") && (
-            <HomeScreen onCreateEvent={(n) => { setUserName(n); setScreen("create"); }} onJoinEvent={handleJoinEvent} onViewHistory={(n) => { setHistoryUser(n); setUserName(n); setScreen("history"); }} />
+            <HomeScreen onCreateEvent={(n) => { setUserName(n); setScreen("create"); }} onJoinEvent={handleJoinEvent} onViewHistory={(n) => { setHistoryUser(n); setUserName(n); setScreen("history"); }} initialJoinCode={screen === "event-join" ? (currentEventId || "") : ""} />
           )}
           {screen === "create" && <CreateEventScreen userName={userName} onCreate={handleCreateEvent} onBack={() => setScreen("home")} />}
           {screen === "history" && <HistoryScreen userName={historyUser} userMap={userMap} onDelete={handleDeleteEvent} onOpen={(id) => { setCurrentEventId(id); setScreen("event"); }} onBack={() => setScreen("home")} />}
