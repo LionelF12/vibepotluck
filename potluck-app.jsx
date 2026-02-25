@@ -306,6 +306,9 @@ function HomeScreen({ onCreateEvent, onJoinEvent, onViewHistory, initialJoinCode
   const [joinName, setJoinName] = useState("");
   const [code, setCode]         = useState(initialJoinCode);
   const [histName, setHistName] = useState("");
+
+  // initialJoinCode arrives after mount (URL useEffect fires after first render)
+  useEffect(() => { if (initialJoinCode) setCode(initialJoinCode); }, [initialJoinCode]);
   return (
     <div style={{ maxWidth: 1200, margin: "0 auto", paddingTop: isMobile ? "1rem" : "2rem", paddingBottom: isMobile ? "1.5rem" : "3rem", paddingLeft: isMobile ? "0.5rem" : "1rem", paddingRight: isMobile ? "0.5rem" : "1rem", display: "flex", flexDirection: "column", gap: "1rem", justifyContent: "center", backgroundImage: `linear-gradient(rgba(255,245,235,0.55), rgba(255,245,235,0.55)), url(${homeBg})`, backgroundSize: "cover", backgroundPosition: "center", backgroundRepeat: "no-repeat", borderRadius: "20px", position: "relative" }}>
       <div style={{ textAlign: "center", marginBottom: isMobile ? "1rem" : "2.5rem" }}>
