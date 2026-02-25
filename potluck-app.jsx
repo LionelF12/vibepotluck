@@ -210,20 +210,6 @@ const getTableTheme = (eventName, mealType) => {
   };
 };
 
-// ── Animation pool ────────────────────────────────────────────────────────────
-const ANIM_POOL = ["float", "wobble", "spin-slow", "bounce-soft", "sway", "pulse-scale", "drift"];
-const ANIM_DURATIONS = { float: "3s", wobble: "1.8s", "spin-slow": "7s", "bounce-soft": "2.4s", sway: "3.2s", "pulse-scale": "2s", drift: "4.5s" };
-
-const getItemAnimation = (seed) => ANIM_POOL[Math.abs(seed) % ANIM_POOL.length];
-
-// Emoji font-size scales prominently with quantity: 1→1.5rem, 2→2.2rem, 3→3.0rem, 4→3.8rem, 5+→4.8rem
-const getEmojiSize = (qty) => {
-  if (qty >= 5) return "4.8rem";
-  if (qty >= 4) return "3.8rem";
-  if (qty >= 3) return "3.0rem";
-  if (qty >= 2) return "2.2rem";
-  return "1.5rem";
-};
 
 // ── Meal types & times ────────────────────────────────────────────────────────
 const MEAL_TYPES = [
@@ -430,25 +416,50 @@ function CreateEventScreen({ userName, onCreate, onBack }) {
 function PotluckTable({ items, attendees }) {
   const isMobile = useIsMobile();
   const isEmpty  = items.length === 0;
-  const tableItems = items.map((item, idx) => {
-    const seed = item.id.split("").reduce((acc, c) => acc + c.charCodeAt(0), 0) + idx;
-    return { ...item, animName: getItemAnimation(seed), animDelay: ((idx * 0.22) % 1.5).toFixed(2) + "s", fontSize: getEmojiSize(item.quantity) };
-  });
+  const tableItems = items.map((item, idx) => ({
+    ...item,
+    animDelay: ((idx * 0.37) % 2).toFixed(2) + "s",
+  }));
+
+  // rAF orbit: directly mutate top/left on each frame — no React re-renders
+  const itemRefs = useRef([]);
+  const orbitRef = useRef(0);
+  const rafRef   = useRef(null);
+
+  useEffect(() => {
+    if (isEmpty) return;
+    const count = tableItems.length;
+    const baseAngles = tableItems.map((_, i) => (i * 360 / count - 90) * (Math.PI / 180));
+    const degPerSec  = 15; // full orbit every 24 s
+    let lastTime = null;
+
+    const animate = (now) => {
+      if (lastTime !== null) {
+        orbitRef.current = (orbitRef.current + ((now - lastTime) / 1000) * degPerSec) % 360;
+      }
+      lastTime = now;
+      const orbitRad = orbitRef.current * (Math.PI / 180);
+      itemRefs.current.forEach((el, i) => {
+        if (!el) return;
+        const a = baseAngles[i] + orbitRad;
+        el.style.top  = `${50 + 32 * Math.sin(a)}%`;
+        el.style.left = `${50 + 32 * Math.cos(a)}%`;
+      });
+      rafRef.current = requestAnimationFrame(animate);
+    };
+    rafRef.current = requestAnimationFrame(animate);
+    return () => { if (rafRef.current) cancelAnimationFrame(rafRef.current); };
+  }, [isEmpty, tableItems.length]);
 
   const stoolCount = Math.min(12, Math.max(1, parseInt(attendees) || 6));
-  const stoolSize  = isMobile ? 18 : 26; // px — circular wooden stool tops
+  const stoolSize  = isMobile ? 18 : 26;
   const chairPad   = isMobile ? "1.5rem" : "2.2rem";
   const tableW     = isMobile ? "min(260px, 72vw)" : "min(320px, 88vw)";
   const woodBg     = "radial-gradient(circle at 38% 32%, #f5e6c8 0%, #e0c080 25%, #c89848 55%, #a87030 80%, #8b5a20 100%)";
 
-  // Stools evenly distributed around the circle using trig (r=46% of wrapper half)
   const stoolPositions = Array.from({ length: stoolCount }, (_, i) => {
     const angle = (i * 360 / stoolCount - 90) * (Math.PI / 180);
-    return {
-      top:       `${50 + 46 * Math.sin(angle)}%`,
-      left:      `${50 + 46 * Math.cos(angle)}%`,
-      transform: "translate(-50%, -50%)",
-    };
+    return { top: `${50 + 46 * Math.sin(angle)}%`, left: `${50 + 46 * Math.cos(angle)}%`, transform: "translate(-50%, -50%)" };
   });
 
   return (
@@ -456,18 +467,15 @@ function PotluckTable({ items, attendees }) {
       <span style={{ fontFamily: "'Fredoka One', cursive", fontSize: "0.88rem", marginBottom: "0.7rem", background: "rgba(255,255,255,0.8)", padding: "3px 18px", borderRadius: 20, border: "1.5px solid #c4965a", color: "#5d4037", letterSpacing: "0.06em" }}>
         🍽️ The Table
       </span>
-      {/* Stool + table wrapper */}
       <div style={{ position: "relative", padding: chairPad, display: "inline-block" }}>
         {stoolPositions.map((pos, i) => (
           <div key={i} style={{ position: "absolute", width: stoolSize, height: stoolSize, borderRadius: "50%", background: "radial-gradient(circle at 35% 30%, #d4a870 0%, #a06828 60%, #7a4a14 100%)", border: "2px solid #5c3008", boxShadow: "0 2px 6px rgba(0,0,0,0.40)", pointerEvents: "none", ...pos }} />
         ))}
         <div style={{ position: "relative", width: tableW, height: tableW, borderRadius: "50%", background: woodBg, boxShadow: "0 0 0 9px #7a4e10, 0 0 0 14px #c4965a, 0 14px 45px rgba(0,0,0,0.30), inset 0 4px 24px rgba(255,255,255,0.10)", display: "flex", alignItems: "center", justifyContent: "center", overflow: "hidden" }}>
-          {/* Wood grain rings */}
           <div style={{ position: "absolute", inset: "7%",  borderRadius: "50%", border: "1px solid rgba(90,50,10,0.20)", pointerEvents: "none" }} />
           <div style={{ position: "absolute", inset: "18%", borderRadius: "50%", border: "1px solid rgba(90,50,10,0.18)", pointerEvents: "none" }} />
           <div style={{ position: "absolute", inset: "31%", borderRadius: "50%", border: "1px solid rgba(90,50,10,0.15)", pointerEvents: "none" }} />
           <div style={{ position: "absolute", inset: "45%", borderRadius: "50%", border: "1px solid rgba(90,50,10,0.12)", pointerEvents: "none" }} />
-          {/* Highlight gleam */}
           <div style={{ position: "absolute", top: "8%", left: "20%", width: "55%", height: "28%", borderRadius: "50%", background: "radial-gradient(ellipse, rgba(255,255,255,0.22) 0%, transparent 70%)", pointerEvents: "none" }} />
           {isEmpty ? (
             <div style={{ textAlign: "center", color: "rgba(0,0,0,0.4)", fontFamily: "'Nunito', sans-serif", fontSize: "0.88rem", padding: "1rem", zIndex: 1 }}>
@@ -475,13 +483,19 @@ function PotluckTable({ items, attendees }) {
               <p style={{ margin: 0 }}>Add your dish below!</p>
             </div>
           ) : tableItems.map((item, i) => {
-            const angle = (i * 360 / tableItems.length - 90) * (Math.PI / 180);
+            const initAngle = (i * 360 / tableItems.length - 90) * (Math.PI / 180);
             const emojiSize = item.quantity >= 5 ? "2.4rem" : item.quantity >= 4 ? "2.0rem" : item.quantity >= 3 ? "1.7rem" : item.quantity >= 2 ? "1.4rem" : "1.2rem";
             return (
-              <div key={item.id} title={`${item.itemName} ×${item.quantity} — by ${item.bringerName}`}
-                style={{ position: "absolute", top: `${50 + 32 * Math.sin(angle)}%`, left: `${50 + 32 * Math.cos(angle)}%`, transform: "translate(-50%, -50%)", display: "flex", flexDirection: "column", alignItems: "center", zIndex: 1, animationName: item.animName, animationDuration: ANIM_DURATIONS[item.animName], animationTimingFunction: "ease-in-out", animationIterationCount: "infinite", animationDelay: item.animDelay }}>
-                <span style={{ fontSize: emojiSize, display: "block", filter: "drop-shadow(0 2px 5px rgba(0,0,0,0.30))", lineHeight: 1 }}>{item.emoji}</span>
-                <span style={{ fontFamily: "'Fredoka One', cursive", fontSize: "0.55rem", color: "#fff", background: "rgba(70,35,0,0.55)", borderRadius: 6, padding: "1px 5px", marginTop: "2px", lineHeight: "1.4", whiteSpace: "nowrap" }}>×{item.quantity}</span>
+              // Outer div: position anchor — rAF updates top/left, transform stays fixed
+              <div key={item.id}
+                ref={el => { itemRefs.current[i] = el; }}
+                style={{ position: "absolute", top: `${50 + 32 * Math.sin(initAngle)}%`, left: `${50 + 32 * Math.cos(initAngle)}%`, transform: "translate(-50%, -50%)", zIndex: 1, pointerEvents: "none" }}>
+                {/* Inner div: subtle pulse animation, independent transform */}
+                <div title={`${item.itemName} ×${item.quantity} — by ${item.bringerName}`}
+                  style={{ display: "flex", flexDirection: "column", alignItems: "center", animationName: "pulse-scale", animationDuration: "2.8s", animationTimingFunction: "ease-in-out", animationIterationCount: "infinite", animationDelay: item.animDelay }}>
+                  <span style={{ fontSize: emojiSize, display: "block", filter: "drop-shadow(0 2px 5px rgba(0,0,0,0.30))", lineHeight: 1 }}>{item.emoji}</span>
+                  <span style={{ fontFamily: "'Fredoka One', cursive", fontSize: "0.55rem", color: "#fff", background: "rgba(70,35,0,0.55)", borderRadius: 6, padding: "1px 5px", marginTop: "2px", lineHeight: "1.4", whiteSpace: "nowrap" }}>×{item.quantity}</span>
+                </div>
               </div>
             );
           })}
