@@ -554,20 +554,27 @@ function AddItemForm({ userName, onAdd, eventName, mealType }) {
 }
 
 // ── Item List ─────────────────────────────────────────────────────────────────
-function ItemList({ items }) {
+const qtyBtn = { width: 24, height: 24, borderRadius: "50%", border: "1px solid #ffcc80", background: "#fff3e0", color: "#e65100", cursor: "pointer", fontSize: "1rem", lineHeight: 1, padding: 0, fontFamily: "monospace", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 };
+
+function ItemList({ items, onDeleteItem, onUpdateQty }) {
   if (!items.length) return null;
   return (
     <Card style={{ marginTop: "1.2rem" }}>
       <h3 style={{ fontFamily: "'Fredoka One', cursive", color: "#e64a19", marginTop: 0, fontSize: "1.2rem" }}>📋 Who's Bringing What</h3>
       <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
         {items.map((item) => (
-          <div key={item.id} style={{ display: "flex", alignItems: "center", gap: "0.7rem", background: "rgba(255,248,244,0.8)", borderRadius: 12, padding: "0.55rem 0.9rem", border: "1px solid #ffe0b2" }}>
+          <div key={item.id} style={{ display: "flex", alignItems: "center", gap: "0.6rem", background: "rgba(255,248,244,0.8)", borderRadius: 12, padding: "0.55rem 0.9rem", border: "1px solid #ffe0b2" }}>
             <span style={{ fontSize: "1.6rem" }}>{item.emoji}</span>
-            <div style={{ flex: 1 }}>
+            <div style={{ flex: 1, minWidth: 0 }}>
               <span style={{ fontFamily: "'Fredoka One', cursive", color: "#bf360c", fontSize: "1rem" }}>{item.itemName}</span>
-              <span style={{ fontFamily: "'Nunito', sans-serif", color: "#8d6e63", fontSize: "0.82rem", marginLeft: 6 }}>×{item.quantity}</span>
+              <span style={{ fontFamily: "'Nunito', sans-serif", color: "#6d4c41", fontSize: "0.82rem", marginLeft: 6 }}>by <strong>{item.bringerName}</strong></span>
             </div>
-            <span style={{ fontFamily: "'Nunito', sans-serif", color: "#6d4c41", fontSize: "0.85rem" }}>by <strong>{item.bringerName}</strong></span>
+            <div style={{ display: "flex", alignItems: "center", gap: "0.25rem", flexShrink: 0 }}>
+              <button style={qtyBtn} onClick={() => onUpdateQty(item.id, item.quantity - 1)}>−</button>
+              <span style={{ fontFamily: "'Fredoka One', cursive", color: "#8d6e63", fontSize: "0.9rem", minWidth: 20, textAlign: "center" }}>{item.quantity}</span>
+              <button style={qtyBtn} onClick={() => onUpdateQty(item.id, item.quantity + 1)}>+</button>
+            </div>
+            <button onClick={() => onDeleteItem(item.id)} style={{ background: "transparent", border: "none", cursor: "pointer", fontSize: "1.1rem", opacity: 0.6, padding: "0 2px", flexShrink: 0 }}>🗑️</button>
           </div>
         ))}
       </div>
@@ -576,7 +583,7 @@ function ItemList({ items }) {
 }
 
 // ── Event Screen ──────────────────────────────────────────────────────────────
-function EventScreen({ event, userName, onAddItem, onBack }) {
+function EventScreen({ event, userName, onAddItem, onDeleteItem, onUpdateItemQty, onBack }) {
   const [shareOpen, setShareOpen] = useState(false);
   const [copied, setCopied]       = useState(false);
   const shareUrl = `${window.location.href.split("?")[0].replace(/\/index\.html$/, "")}?event=${event.id}`;
@@ -625,7 +632,7 @@ function EventScreen({ event, userName, onAddItem, onBack }) {
 
       <PotluckTable items={event.items || []} eventName={event.name} mealType={event.mealType} attendees={event.attendees} />
       <AddItemForm userName={userName} onAdd={(item) => onAddItem(event.id, item, userName)} eventName={event.name} mealType={event.mealType} />
-      <ItemList items={event.items || []} />
+      <ItemList items={event.items || []} onDeleteItem={(itemId) => onDeleteItem(event.id, itemId)} onUpdateQty={(itemId, qty) => onUpdateItemQty(event.id, itemId, qty)} />
     </div>
   );
 }
@@ -717,6 +724,34 @@ export default function App() {
     }
   }, [registerUserEvent]);
 
+  const handleDeleteItem = useCallback(async (eventId, itemId) => {
+    try {
+      const itemsRef = ref(db, `events/${eventId}/items`);
+      const snap = await get(itemsRef);
+      const current = snap.val() || [];
+      await set(itemsRef, current.filter((item) => item.id !== itemId));
+    } catch (err) {
+      console.error("Failed to delete item:", err);
+      alert("Could not remove item — check your connection and try again.");
+    }
+  }, []);
+
+  const handleUpdateItemQty = useCallback(async (eventId, itemId, newQty) => {
+    try {
+      const itemsRef = ref(db, `events/${eventId}/items`);
+      const snap = await get(itemsRef);
+      const current = snap.val() || [];
+      if (newQty <= 0) {
+        await set(itemsRef, current.filter((item) => item.id !== itemId));
+      } else {
+        await set(itemsRef, current.map((item) => item.id === itemId ? { ...item, quantity: newQty } : item));
+      }
+    } catch (err) {
+      console.error("Failed to update item:", err);
+      alert("Could not update quantity — check your connection and try again.");
+    }
+  }, []);
+
   const handleDeleteEvent = useCallback(async (eventId) => {
     await remove(ref(db, `events/${eventId}`));
     setUserMap((prev) => {
@@ -763,7 +798,7 @@ export default function App() {
           {screen === "create" && <CreateEventScreen userName={userName} onCreate={handleCreateEvent} onBack={() => setScreen("home")} />}
           {screen === "history" && <HistoryScreen userName={historyUser} userMap={userMap} onDelete={handleDeleteEvent} onOpen={(id) => { setCurrentEventId(id); setScreen("event"); }} onBack={() => setScreen("home")} />}
           {screen === "event" && currentEventId && currentEvent && (
-            <EventScreen event={currentEvent} userName={userName} onAddItem={handleAddItem} onBack={() => setScreen("home")} />
+            <EventScreen event={currentEvent} userName={userName} onAddItem={handleAddItem} onDeleteItem={handleDeleteItem} onUpdateItemQty={handleUpdateItemQty} onBack={() => setScreen("home")} />
           )}
           {screen === "event" && currentEventId && !currentEvent && (
             <div style={{ textAlign: "center", paddingTop: "5rem", fontFamily: "'Fredoka One', cursive", color: "#5d4e37", fontSize: "1.6rem" }}>🍽️ Loading event…</div>
