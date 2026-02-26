@@ -709,13 +709,33 @@ function AddItemForm({ userName, onAdd, eventName, mealType }) {
 // ── Item List ─────────────────────────────────────────────────────────────────
 const qtyBtn = { width: 24, height: 24, borderRadius: "50%", border: "1px solid #ffcc80", background: "#fff3e0", color: "#e65100", cursor: "pointer", fontSize: "1rem", lineHeight: 1, padding: 0, fontFamily: "monospace", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 };
 
+const GROUP_ORDER = ["Protein", "Vegetables", "Carbohydrates", "Desserts", "Fruit", "Dairy", "Drinks", "Unknown"];
+
 function ItemList({ items, onDeleteItem, onUpdateQty }) {
+  const [sortBy, setSortBy] = useState("alpha");
   if (!items.length) return null;
+  const sorted = [...items].sort((a, b) => {
+    if (sortBy === "group") {
+      const ga = GROUP_ORDER.indexOf(getFoodCategory(a.itemName).label);
+      const gb = GROUP_ORDER.indexOf(getFoodCategory(b.itemName).label);
+      if (ga !== gb) return ga - gb;
+    }
+    return a.itemName.localeCompare(b.itemName);
+  });
+  const sortBtn = (val, label) => (
+    <button onClick={() => setSortBy(val)} style={{ fontFamily: "'Fredoka One', cursive", fontSize: "0.78rem", padding: "0.2rem 0.65rem", borderRadius: 20, border: `1.5px solid ${sortBy === val ? "#ff6a00" : "#ffccbc"}`, background: sortBy === val ? "#ff6a00" : "transparent", color: sortBy === val ? "#fff" : "#a1887f", cursor: "pointer", transition: "all 0.15s" }}>{label}</button>
+  );
   return (
     <Card style={{ marginTop: "1.2rem" }}>
-      <h3 style={{ fontFamily: "'Fredoka One', cursive", color: "#e64a19", marginTop: 0, fontSize: "1.2rem" }}>📋 Who's Bringing What</h3>
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "0.6rem" }}>
+        <h3 style={{ fontFamily: "'Fredoka One', cursive", color: "#e64a19", margin: 0, fontSize: "1.2rem" }}>📋 Who's Bringing What</h3>
+        <div style={{ display: "flex", gap: "0.3rem" }}>
+          {sortBtn("alpha", "A–Z")}
+          {sortBtn("group", "Food Group")}
+        </div>
+      </div>
       <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
-        {[...items].sort((a, b) => a.itemName.localeCompare(b.itemName)).map((item) => {
+        {sorted.map((item) => {
           const cat = getFoodCategory(item.itemName);
           return (
           <div key={item.id} style={{ display: "flex", alignItems: "center", gap: "0.6rem", background: cat.bg, borderRadius: 12, padding: "0.55rem 0.9rem", border: `2px solid ${cat.color}` }}>
