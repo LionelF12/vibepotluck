@@ -113,6 +113,24 @@ const getFoodEmoji = (itemName) => {
   return "🎁";
 };
 
+// ── Food group category (for color-coding) ───────────────────────────────────
+const getFoodCategory = (itemName) => {
+  const n = (itemName || "").toLowerCase();
+  const groups = [
+    { label: "Desserts",      color: "#ce93d8", bg: "#f3e5f5", keys: ["cake","cookie","brownie","pie","donut","muffin","candy","chocolate","tiramisu","pudding","ice cream","cobbler","tart","crisp","crumble","shortbread","fudge","truffle","churro","dessert","sweet","egg tart","mango pudding","red bean soup","black sesame soup","tofu pudding","douhua","tang yuan","pineapple bun","wife cake","cocktail bun","chendol","ice kachang","kueh","ondeh ondeh","pandan cake","ang ku kueh","kaya toast","custard bun","nian gao","lo mai chi","sago"] },
+    { label: "Drinks",        color: "#80deea", bg: "#e0f7fa", keys: ["juice","lemonade","punch","wine","beer","champagne","cider","coffee","tea","water","soda","drink","beverage","mimosa","boba","iced tea","sweet tea","sangria","teh tarik","kopi","bandung","milo","horlicks","barley water","soya bean","soy milk","sugar cane","calamansi","chrysanthemum","grass jelly","cincau","yakult","ribena"] },
+    { label: "Fruit",         color: "#f48fb1", bg: "#fce4ec", keys: ["fruit","strawberry","blueberry","watermelon","apple","banana","mango","grape","cherry","peach","pineapple","kiwi","orange","pear","lemon","berry","berries","durian","longan","lychee","rambutan","papaya","dragon fruit","dragonfruit","jackfruit","pomelo","starfruit","mangosteen","soursop","guava","passionfruit"] },
+    { label: "Protein",       color: "#ef9a9a", bg: "#ffebee", keys: ["chicken","turkey","beef","steak","meat","pork","bacon","sausage","ham","bbq","ribs","brisket","lamb","hotdog","burger","wing","fish","seafood","salmon","tuna","shrimp","crab","lobster","clam","oyster","mussel","scallop","egg","deviled","tofu","tempeh","bean","lentil","chickpea","hummus","falafel","dumpling","char siu","char siew","siu yuk","roast pork","roast duck","roast goose","roast chicken","white cut chicken","hainanese chicken","satay","chili crab","black pepper crab","bak kut teh","har gow","siu mai","lo mai gai","wonton","oyster omelette","ngoh hiang","lap cheong","chinese sausage","century egg","salted egg","fish cake","fish ball","you tiao","youtiao","prawn paste chicken","kung pao","sweet and sour pork","mapo","char siew bao","crispy pork","duck rice","pig trotter","braised pork"] },
+    { label: "Vegetables",    color: "#81c784", bg: "#e8f5e9", keys: ["salad","coleslaw","tabbouleh","broccoli","carrot","corn","spinach","kale","arugula","lettuce","cucumber","tomato","green bean","edamame","mushroom","sweet potato","avocado","guacamole","soup","stew","chili","casserole","bok choy","gai lan","kai lan","morning glory","kangkong","water spinach","lotus root","bamboo shoot","bean sprout","choy sum","napa cabbage","achar","pickled vegetable","winter melon","yam","taro","bitter gourd","kailan","chap chye","sayur","vegetable curry","mixed vegetables","chinese cabbage"] },
+    { label: "Carbohydrates", color: "#ffb74d", bg: "#fff8e1", keys: ["pasta","rice","bread","noodle","lasagna","gnocchi","potato","mac","ramen","naan","pita","bagel","roll","bun","flatbread","croissant","waffle","pancake","grits","polenta","couscous","quinoa","pretzel","cracker","chip","nacho","tortilla","wrap","taco","sushi","burrito","char kway teow","kway teow","laksa","nasi lemak","nasi goreng","fried rice","mee goreng","mee rebus","roti prata","roti canai","wonton mee","fish ball noodle","lor mee","mee siam","popiah","curry puff","epok epok","cheung fun","turnip cake","chai tow kway","radish cake","lo bak go","clay pot rice","claypot rice","congee","jook","porridge","char siu bao","bao","mantou","yam cake","bee hoon","hor fun","ho fun","kway chap","hae mee","prawn noodle","mee pok","kolo mee","tang hoon","glass noodle","spring roll","pau","dim sum","yum cha","chee cheong fun","chwee kueh"] },
+    { label: "Dairy",         color: "#90caf9", bg: "#e3f2fd", keys: ["cheese","queso","milk","cream","yogurt","tzatziki","butter","brie","charcuterie","coconut milk","kaya"] },
+  ];
+  for (const g of groups) {
+    if (g.keys.some((k) => n.includes(k))) return g;
+  }
+  return { label: "Unknown", color: "#bdbdbd", bg: "#f5f5f5" };
+};
+
 // ── Contextual food recommendations ──────────────────────────────────────────
 const getEventRecommendations = (eventName, mealType) => {
   const name = (eventName || "").toLowerCase();
@@ -299,6 +317,122 @@ function Select({ label, value, onChange, options, required, placeholder = "— 
   );
 }
 
+// ── Mascot (Potsy the Chef) ───────────────────────────────────────────────────
+function Mascot({ size = 130, style = {} }) {
+  return (
+    <div style={{ display: "inline-block", ...style }}>
+      <style>{`
+        @keyframes mascotFloat {
+          0%, 100% { transform: translateY(0px); }
+          50%       { transform: translateY(-10px); }
+        }
+        @keyframes mascotSway {
+          0%, 100% { transform: rotate(-2.5deg); }
+          50%       { transform: rotate(2.5deg); }
+        }
+        @keyframes mascotBlink {
+          0%, 85%, 100% { opacity: 1; }
+          90%, 96%       { opacity: 0; }
+        }
+        @keyframes mascotBlinkClosed {
+          0%, 85%, 100% { opacity: 0; }
+          90%, 96%       { opacity: 1; }
+        }
+        @keyframes mascotArmWave {
+          0%, 100% { transform: rotate(0deg); }
+          50%       { transform: rotate(-18deg); }
+        }
+      `}</style>
+      <div style={{ animation: "mascotFloat 3.5s ease-in-out infinite", display: "inline-block" }}>
+        <svg
+          width={size}
+          height={Math.round(size * 1.45)}
+          viewBox="0 0 140 203"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+          style={{ animation: "mascotSway 4s ease-in-out infinite", transformOrigin: "70px 198px", display: "block", overflow: "visible" }}
+        >
+          {/* === SHOES === */}
+          <ellipse cx="50" cy="192" rx="16" ry="9" fill="#6b4c35" />
+          <ellipse cx="44" cy="188" rx="8" ry="4" fill="#8d6e63" opacity="0.45" />
+          <ellipse cx="90" cy="192" rx="16" ry="9" fill="#6b4c35" />
+          <ellipse cx="84" cy="188" rx="8" ry="4" fill="#8d6e63" opacity="0.45" />
+
+          {/* === LEFT ARM (behind body) === */}
+          <ellipse cx="26" cy="148" rx="14" ry="10" fill="#FFCBA4" transform="rotate(-22 26 148)" />
+          <circle cx="18" cy="160" r="11" fill="#FFCBA4" />
+
+          {/* === BODY === */}
+          <ellipse cx="70" cy="158" rx="36" ry="32" fill="#ff6a00" />
+          <ellipse cx="62" cy="138" rx="14" ry="7" fill="#ff8c40" opacity="0.35" />
+          {/* Apron front */}
+          <ellipse cx="70" cy="162" rx="21" ry="23" fill="#fff8f0" />
+          {/* Apron waist ties */}
+          <rect x="47" y="150" width="11" height="8" rx="4" fill="#ffd4a8" />
+          <rect x="82" y="150" width="11" height="8" rx="4" fill="#ffd4a8" />
+          {/* Apron pocket */}
+          <rect x="61" y="174" width="18" height="11" rx="5" fill="#f0e0cc" />
+
+          {/* === EARS (behind head) === */}
+          <circle cx="31" cy="97" r="12" fill="#FFCBA4" />
+          <circle cx="31" cy="97" r="7" fill="#e8a070" opacity="0.45" />
+          <circle cx="109" cy="97" r="12" fill="#FFCBA4" />
+          <circle cx="109" cy="97" r="7" fill="#e8a070" opacity="0.45" />
+
+          {/* === HEAD === */}
+          <circle cx="70" cy="97" r="40" fill="#FFCBA4" />
+
+          {/* === CHEF HAT === */}
+          <rect x="36" y="12" width="68" height="50" rx="7" fill="white" />
+          <ellipse cx="70" cy="12" rx="34" ry="10" fill="#f0ede8" />
+          <ellipse cx="70" cy="8" rx="25" ry="21" fill="white" />
+          <ellipse cx="70" cy="22" rx="25" ry="9" fill="#e8e5e0" opacity="0.5" />
+          <rect x="28" y="59" width="84" height="14" rx="7" fill="#8d6e63" />
+          <rect x="28" y="67" width="84" height="4" rx="2" fill="#7a5c54" opacity="0.4" />
+
+          {/* === FACE: eyebrows === */}
+          <path d="M 47 82 Q 57 77 67 81" stroke="#5d3a20" strokeWidth="2.8" strokeLinecap="round" fill="none" />
+          <path d="M 73 81 Q 83 77 93 82" stroke="#5d3a20" strokeWidth="2.8" strokeLinecap="round" fill="none" />
+
+          {/* === FACE: open eyes (animated blink) === */}
+          <g style={{ animation: "mascotBlink 5s ease-in-out infinite" }}>
+            <circle cx="55" cy="96" r="10" fill="white" />
+            <circle cx="85" cy="96" r="10" fill="white" />
+            <circle cx="56" cy="97" r="6" fill="#2d1a0e" />
+            <circle cx="86" cy="97" r="6" fill="#2d1a0e" />
+            <circle cx="58" cy="94" r="2.5" fill="white" />
+            <circle cx="88" cy="94" r="2.5" fill="white" />
+          </g>
+
+          {/* === FACE: closed eyes (blink flash) === */}
+          <g style={{ animation: "mascotBlinkClosed 5s ease-in-out infinite" }}>
+            <path d="M 46 96 Q 55 103 64 96" stroke="#2d1a0e" strokeWidth="2.5" strokeLinecap="round" fill="none" />
+            <path d="M 76 96 Q 85 103 94 96" stroke="#2d1a0e" strokeWidth="2.5" strokeLinecap="round" fill="none" />
+          </g>
+
+          {/* === FACE: nose, cheeks, smile === */}
+          <ellipse cx="70" cy="108" rx="4.5" ry="3" fill="#e8906a" opacity="0.8" />
+          <ellipse cx="43" cy="114" rx="12" ry="7" fill="#ffb3a0" opacity="0.55" />
+          <ellipse cx="97" cy="114" rx="12" ry="7" fill="#ffb3a0" opacity="0.55" />
+          <path d="M 55 118 Q 70 131 85 118" stroke="#c0523a" strokeWidth="2.8" strokeLinecap="round" fill="none" />
+
+          {/* === RIGHT ARM + WOODEN SPOON (in front, animated wave) === */}
+          <g style={{ transformOrigin: "103px 136px", animation: "mascotArmWave 2.8s ease-in-out infinite" }}>
+            <ellipse cx="112" cy="148" rx="13" ry="10" fill="#FFCBA4" transform="rotate(22 112 148)" />
+            <circle cx="120" cy="160" r="10" fill="#FFCBA4" />
+            {/* Spoon handle */}
+            <rect x="124" y="118" width="6" height="46" rx="3" fill="#c49a6c" />
+            <rect x="125.5" y="114" width="3" height="8" rx="1.5" fill="#b8894c" />
+            {/* Spoon bowl */}
+            <ellipse cx="127" cy="112" rx="9" ry="7" fill="#c49a6c" />
+            <ellipse cx="127" cy="111" rx="6" ry="4.5" fill="#d4aa7d" opacity="0.85" />
+          </g>
+        </svg>
+      </div>
+    </div>
+  );
+}
+
 // ── Home Screen ───────────────────────────────────────────────────────────────
 function HomeScreen({ onCreateEvent, onJoinEvent, onViewHistory, initialJoinCode = "" }) {
   const isMobile = useIsMobile();
@@ -312,7 +446,9 @@ function HomeScreen({ onCreateEvent, onJoinEvent, onViewHistory, initialJoinCode
   return (
     <div style={{ maxWidth: 1200, margin: "0 auto", paddingTop: isMobile ? "1rem" : "2rem", paddingBottom: isMobile ? "1.5rem" : "3rem", paddingLeft: isMobile ? "0.5rem" : "1rem", paddingRight: isMobile ? "0.5rem" : "1rem", display: "flex", flexDirection: "column", gap: "1rem", justifyContent: "center", backgroundImage: `linear-gradient(rgba(255,245,235,0.55), rgba(255,245,235,0.55)), url(${homeBg})`, backgroundSize: "cover", backgroundPosition: "center", backgroundRepeat: "no-repeat", borderRadius: "20px", position: "relative" }}>
       <div style={{ textAlign: "center", marginBottom: isMobile ? "1rem" : "2.5rem" }}>
-        <div style={{ fontSize: "clamp(2rem, 10vw, 4rem)", marginBottom: "0.4rem" }}>🥟</div>
+        <div style={{ display: "inline-flex", alignItems: "flex-end", justifyContent: "center", background: "white", borderRadius: "50%", width: isMobile ? 210 : 280, height: isMobile ? 210 : 280, overflow: "hidden", boxShadow: "0 8px 40px rgba(255,106,0,0.30), 0 0 0 8px rgba(255,255,255,0.55)", marginBottom: "1rem" }}>
+          <Mascot size={isMobile ? 200 : 260} />
+        </div>
         <h1 style={{ fontFamily: "'Fredoka One', cursive", fontSize: "clamp(2.8rem, 14vw, 6.5rem)", color: "#ff6a00", margin: 0, lineHeight: 1.1, fontWeight: "900", textShadow: "3px 3px 0 #fff, 6px 6px 0 rgba(255,150,0,0.35), 0 0 40px rgba(255,120,0,0.5)" }}>Potluck Pal</h1>
         <p style={{ fontFamily: "'Nunito', sans-serif", fontStyle: "italic", color: "#3e2000", marginTop: 8, fontSize: "clamp(0.85rem, 3.5vw, 1.1rem)", display: "inline-block", background: "rgba(255,245,220,0.72)", borderRadius: 20, padding: "4px 18px" }}>Bring something delicious, share something wonderful 🎉</p>
       </div>
@@ -408,6 +544,11 @@ function CreateEventScreen({ userName, onCreate, onBack }) {
         <Input label="Date" value={form.date} onChange={set("date")} type="date" required />
         <Select label="Time" value={form.time} onChange={set("time")} options={TIME_OPTIONS} required placeholder="— Choose a time —" />
         <Input label="Location" value={form.location} onChange={set("location")} placeholder="e.g. Grandma's Backyard" required />
+        {form.location.trim() && (
+          <div style={{ marginTop: "-0.6rem", marginBottom: "1rem", textAlign: "right" }}>
+            <a href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(form.location.trim())}`} target="_blank" rel="noopener noreferrer" style={{ fontSize: "0.8rem", color: "#ff6a00", fontFamily: "'Nunito', sans-serif", textDecoration: "none" }}>📍 Preview on Maps ↗</a>
+          </div>
+        )}
         <Input label="Number of Guests" value={form.attendees} onChange={set("attendees")} type="number" placeholder="e.g. 12" required />
         <Button onClick={() => valid && onCreate(form)} disabled={!valid} style={{ width: "100%" }}>🚀 Create Event & Get Link</Button>
       </Card>
@@ -488,6 +629,7 @@ function PotluckTable({ items, attendees }) {
           ) : tableItems.map((item, i) => {
             const initAngle = (i * 360 / tableItems.length - 90) * (Math.PI / 180);
             const emojiSize = item.quantity >= 5 ? "2.4rem" : item.quantity >= 4 ? "2.0rem" : item.quantity >= 3 ? "1.7rem" : item.quantity >= 2 ? "1.4rem" : "1.2rem";
+            const cat = getFoodCategory(item.itemName);
             return (
               // Outer div: position anchor — rAF updates top/left, transform stays fixed
               <div key={item.id}
@@ -496,7 +638,9 @@ function PotluckTable({ items, attendees }) {
                 {/* Inner div: subtle pulse animation, independent transform */}
                 <div title={`${item.itemName} ×${item.quantity} — by ${item.bringerName}`}
                   style={{ display: "flex", flexDirection: "column", alignItems: "center", animationName: "pulse-scale", animationDuration: "2.8s", animationTimingFunction: "ease-in-out", animationIterationCount: "infinite", animationDelay: item.animDelay }}>
-                  <span style={{ fontSize: emojiSize, display: "block", filter: "drop-shadow(0 2px 5px rgba(0,0,0,0.30))", lineHeight: 1 }}>{item.emoji}</span>
+                  <div style={{ background: "rgba(255,255,255,0.88)", border: `3px solid ${cat.color}`, borderRadius: "50%", padding: "4px", display: "inline-flex", alignItems: "center", justifyContent: "center", boxShadow: `0 2px 8px rgba(0,0,0,0.20), 0 0 0 1px rgba(255,255,255,0.5)` }}>
+                    <span style={{ fontSize: emojiSize, display: "block", lineHeight: 1 }}>{item.emoji}</span>
+                  </div>
                   <span style={{ fontFamily: "'Fredoka One', cursive", fontSize: "0.55rem", color: "#fff", background: "rgba(70,35,0,0.55)", borderRadius: 6, padding: "1px 5px", marginTop: "2px", lineHeight: "1.4", whiteSpace: "nowrap" }}>×{item.quantity}</span>
                 </div>
               </div>
@@ -562,8 +706,10 @@ function ItemList({ items, onDeleteItem, onUpdateQty }) {
     <Card style={{ marginTop: "1.2rem" }}>
       <h3 style={{ fontFamily: "'Fredoka One', cursive", color: "#e64a19", marginTop: 0, fontSize: "1.2rem" }}>📋 Who's Bringing What</h3>
       <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
-        {items.map((item) => (
-          <div key={item.id} style={{ display: "flex", alignItems: "center", gap: "0.6rem", background: "rgba(255,248,244,0.8)", borderRadius: 12, padding: "0.55rem 0.9rem", border: "1px solid #ffe0b2" }}>
+        {items.map((item) => {
+          const cat = getFoodCategory(item.itemName);
+          return (
+          <div key={item.id} style={{ display: "flex", alignItems: "center", gap: "0.6rem", background: cat.bg, borderRadius: 12, padding: "0.55rem 0.9rem", border: `2px solid ${cat.color}` }}>
             <span style={{ fontSize: "1.6rem" }}>{item.emoji}</span>
             <div style={{ flex: 1, minWidth: 0 }}>
               <span style={{ fontFamily: "'Fredoka One', cursive", color: "#bf360c", fontSize: "1rem" }}>{item.itemName}</span>
@@ -576,15 +722,18 @@ function ItemList({ items, onDeleteItem, onUpdateQty }) {
             </div>
             <button onClick={() => onDeleteItem(item.id)} style={{ background: "transparent", border: "none", cursor: "pointer", fontSize: "1.1rem", opacity: 0.6, padding: "0 2px", flexShrink: 0 }}>🗑️</button>
           </div>
-        ))}
+          );
+        })}
       </div>
     </Card>
   );
 }
 
 // ── Event Screen ──────────────────────────────────────────────────────────────
-function EventScreen({ event, userName, onAddItem, onDeleteItem, onUpdateItemQty, onBack }) {
+function EventScreen({ event, userName, onAddItem, onDeleteItem, onUpdateItemQty, onAddGuest, onRemoveGuest, onBack }) {
   const [shareOpen, setShareOpen] = useState(false);
+  const [guestOpen, setGuestOpen] = useState(false);
+  const [newGuest, setNewGuest]   = useState("");
   const [copied, setCopied]       = useState(false);
   const shareUrl = `${window.location.href.split("?")[0].replace(/\/index\.html$/, "")}?event=${event.id}`;
   const theme    = getTableTheme(event.name, event.mealType);
@@ -601,17 +750,27 @@ function EventScreen({ event, userName, onAddItem, onDeleteItem, onUpdateItemQty
     <div style={{ maxWidth: 600, margin: "0 auto", paddingTop: "1.2rem" }}>
       <Button variant="ghost" onClick={onBack} style={{ marginBottom: "0.8rem" }}>← Home</Button>
       <Card style={{ marginBottom: "1.2rem" }}>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: "0.5rem", marginBottom: shareOpen ? "0.75rem" : 0 }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: "0.5rem", marginBottom: (shareOpen || guestOpen) ? "0.75rem" : 0 }}>
           <div>
             <h2 style={{ fontFamily: "'Fredoka One', cursive", color: "#5d4e37", marginTop: 0, fontSize: "clamp(1.45rem, 5vw, 1.9rem)" }}>🎊 {event.name}</h2>
             {mealLabel && <p style={{ fontFamily: "'Nunito', sans-serif", color: "#5d4e37", margin: "4px 0", fontSize: "1rem" }}>🍴 {mealLabel}</p>}
             <p style={{ fontFamily: "'Nunito', sans-serif", color: "#5d4e37", margin: "4px 0", fontSize: "1rem" }}>📅 {fmtDate(event.date)} at {fmtTime(event.time)}</p>
-            <p style={{ fontFamily: "'Nunito', sans-serif", color: "#5d4e37", margin: "4px 0", fontSize: "1rem" }}>📍 {event.location}</p>
+            <p style={{ fontFamily: "'Nunito', sans-serif", color: "#5d4e37", margin: "4px 0", fontSize: "1rem" }}>
+              📍{" "}
+              {event.location ? (
+                <a href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(event.location)}`} target="_blank" rel="noopener noreferrer" style={{ color: "#ff6a00", textDecoration: "underline", fontFamily: "'Nunito', sans-serif" }}>{event.location}</a>
+              ) : event.location}
+            </p>
             <p style={{ fontFamily: "'Nunito', sans-serif", color: "#5d4e37", margin: "4px 0", fontSize: "1rem" }}>👥 {event.attendees} guests</p>
           </div>
-          <Button onClick={() => setShareOpen((o) => !o)} variant="secondary" style={{ padding: "0.4rem 0.8rem", fontSize: "0.82rem" }}>
-            {shareOpen ? "✕ Close" : "🔗 Share Link"}
-          </Button>
+          <div style={{ display: "flex", gap: "0.4rem", flexShrink: 0 }}>
+            <Button onClick={() => { setGuestOpen((o) => !o); setShareOpen(false); }} variant="secondary" style={{ padding: "0.4rem 0.8rem", fontSize: "0.82rem" }}>
+              {guestOpen ? "✕ Guests" : `👥 Guests${(event.guests || []).length > 0 ? ` (${(event.guests || []).length})` : ""}`}
+            </Button>
+            <Button onClick={() => { setShareOpen((o) => !o); setGuestOpen(false); }} variant="secondary" style={{ padding: "0.4rem 0.8rem", fontSize: "0.82rem" }}>
+              {shareOpen ? "✕ Close" : "🔗 Share"}
+            </Button>
+          </div>
         </div>
         {shareOpen && (
           <div style={{ width: "100%", background: "rgba(255,250,245,0.98)", border: `2px solid ${theme.ring}`, borderRadius: 16, padding: "0.85rem 1rem", animation: "popIn 0.25s cubic-bezier(0.34,1.56,0.64,1)" }}>
@@ -626,6 +785,36 @@ function EventScreen({ event, userName, onAddItem, onDeleteItem, onUpdateItemQty
               </button>
             </div>
             <p style={{ fontFamily: "'Nunito', sans-serif", color: "#a1887f", fontSize: "0.72rem", margin: 0 }}>Anyone with this link can view and add dishes to the event.</p>
+          </div>
+        )}
+        {guestOpen && (
+          <div style={{ width: "100%", background: "rgba(255,250,245,0.98)", border: `2px solid ${theme.ring}`, borderRadius: 16, padding: "0.85rem 1rem", animation: "popIn 0.25s cubic-bezier(0.34,1.56,0.64,1)" }}>
+            <p style={{ fontFamily: "'Fredoka One', cursive", color: "#5d4e37", fontSize: "0.92rem", margin: "0 0 0.6rem" }}>👥 Who's coming:</p>
+            <div style={{ display: "flex", flexDirection: "column", gap: "0.35rem", marginBottom: "0.75rem" }}>
+              {(event.guests || []).length === 0 && (
+                <p style={{ fontFamily: "'Nunito', sans-serif", color: "#a1887f", fontSize: "0.82rem", margin: 0 }}>No guests yet — share the link!</p>
+              )}
+              {(event.guests || []).map((g) => (
+                <div key={g.id} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", background: "rgba(255,255,255,0.85)", border: "1.5px solid #ffccbc", borderRadius: 10, padding: "0.3rem 0.7rem" }}>
+                  <span style={{ fontFamily: "'Nunito', sans-serif", color: "#5d4037", fontSize: "0.9rem" }}>🙋 {g.name}</span>
+                  <button onClick={() => onRemoveGuest(g.id)} style={{ background: "transparent", border: "none", cursor: "pointer", color: "#bcaaa4", fontSize: "1rem", lineHeight: 1, padding: "0 2px" }} title="Remove guest">×</button>
+                </div>
+              ))}
+            </div>
+            <div style={{ display: "flex", gap: "0.5rem" }}>
+              <input
+                value={newGuest}
+                onChange={(e) => setNewGuest(e.target.value)}
+                onKeyDown={(e) => { if (e.key === "Enter" && newGuest.trim()) { onAddGuest(newGuest.trim()); setNewGuest(""); } }}
+                placeholder="Add a guest name…"
+                style={{ flex: 1, padding: "0.4rem 0.7rem", borderRadius: 10, border: "1.5px solid #ffccbc", fontFamily: "'Nunito', sans-serif", fontSize: "0.88rem", outline: "none", background: "rgba(255,255,255,0.95)", color: "#5d4037" }}
+              />
+              <button
+                onClick={() => { if (newGuest.trim()) { onAddGuest(newGuest.trim()); setNewGuest(""); } }}
+                disabled={!newGuest.trim()}
+                style={{ border: "none", borderRadius: 10, padding: "0.4rem 0.9rem", cursor: newGuest.trim() ? "pointer" : "not-allowed", fontFamily: "'Fredoka One', cursive", fontSize: "0.88rem", background: "linear-gradient(135deg,#8d6e63,#a1887f)", color: "#fff", opacity: newGuest.trim() ? 1 : 0.5 }}
+              >Add</button>
+            </div>
           </div>
         )}
       </Card>
@@ -682,7 +871,7 @@ export default function App() {
   const handleCreateEvent = useCallback(async (form) => {
     try {
       const id = generateId();
-      const newEvent = { id, ...form, createdBy: userName, items: [], createdAt: Date.now() };
+      const newEvent = { id, ...form, createdBy: userName, items: [], guests: [{ id: generateId(), name: userName, joinedAt: Date.now() }], createdAt: Date.now() };
       await set(ref(db, `events/${id}`), newEvent);
       registerUserEvent(userName, id);
       setCurrentEventId(id);
@@ -699,6 +888,12 @@ export default function App() {
       const snap = await get(ref(db, `events/${id}`));
       if (snap.exists()) {
         registerUserEvent(name, id);
+        const gRef = ref(db, `events/${id}/guests`);
+        const gSnap = await get(gRef);
+        const currentGuests = gSnap.val() || [];
+        if (!currentGuests.some((g) => g.name.toLowerCase() === name.toLowerCase())) {
+          await set(gRef, [...currentGuests, { id: generateId(), name, joinedAt: Date.now() }]);
+        }
         setCurrentEventId(id);
         setScreen("event");
       } else {
@@ -752,6 +947,30 @@ export default function App() {
     }
   }, []);
 
+  const handleAddGuest = useCallback(async (eventId, name) => {
+    try {
+      const gRef = ref(db, `events/${eventId}/guests`);
+      const snap = await get(gRef);
+      const current = snap.val() || [];
+      if (!current.some((g) => g.name.toLowerCase() === name.toLowerCase())) {
+        await set(gRef, [...current, { id: generateId(), name: name.trim(), joinedAt: Date.now() }]);
+      }
+    } catch (err) {
+      console.error("Failed to add guest:", err);
+    }
+  }, []);
+
+  const handleRemoveGuest = useCallback(async (eventId, guestId) => {
+    try {
+      const gRef = ref(db, `events/${eventId}/guests`);
+      const snap = await get(gRef);
+      const current = snap.val() || [];
+      await set(gRef, current.filter((g) => g.id !== guestId));
+    } catch (err) {
+      console.error("Failed to remove guest:", err);
+    }
+  }, []);
+
   const handleDeleteEvent = useCallback(async (eventId) => {
     await remove(ref(db, `events/${eventId}`));
     setUserMap((prev) => {
@@ -798,7 +1017,7 @@ export default function App() {
           {screen === "create" && <CreateEventScreen userName={userName} onCreate={handleCreateEvent} onBack={() => setScreen("home")} />}
           {screen === "history" && <HistoryScreen userName={historyUser} userMap={userMap} onDelete={handleDeleteEvent} onOpen={(id) => { setCurrentEventId(id); setScreen("event"); }} onBack={() => setScreen("home")} />}
           {screen === "event" && currentEventId && currentEvent && (
-            <EventScreen event={currentEvent} userName={userName} onAddItem={handleAddItem} onDeleteItem={handleDeleteItem} onUpdateItemQty={handleUpdateItemQty} onBack={() => setScreen("home")} />
+            <EventScreen event={currentEvent} userName={userName} onAddItem={handleAddItem} onDeleteItem={handleDeleteItem} onUpdateItemQty={handleUpdateItemQty} onAddGuest={(name) => handleAddGuest(currentEventId, name)} onRemoveGuest={(guestId) => handleRemoveGuest(currentEventId, guestId)} onBack={() => setScreen("home")} />
           )}
           {screen === "event" && currentEventId && !currentEvent && (
             <div style={{ textAlign: "center", paddingTop: "5rem", fontFamily: "'Fredoka One', cursive", color: "#5d4e37", fontSize: "1.6rem" }}>🍽️ Loading event…</div>
