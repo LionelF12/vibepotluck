@@ -653,16 +653,19 @@ function PotluckTable({ items, attendees }) {
 }
 
 // ── Add Item Form ─────────────────────────────────────────────────────────────
+const UNIT_OPTIONS = ["pcs", "ptns", "pkts", "btls", "cans", "bags", "bxs", "plts", "cups", "svgs"];
+
 function AddItemForm({ userName, onAdd, eventName, mealType }) {
   const [itemName, setItemName] = useState("");
   const [quantity, setQuantity] = useState("1");
+  const [unit, setUnit]         = useState("svgs");
   const [added, setAdded]       = useState(false);
   const recs = getEventRecommendations(eventName, mealType);
 
   const handleAdd = () => {
     if (!itemName.trim() || Number(quantity) < 1) return;
-    onAdd({ itemName: itemName.trim(), quantity: Number(quantity) });
-    setItemName(""); setQuantity("1");
+    onAdd({ itemName: itemName.trim(), quantity: Number(quantity), unit });
+    setItemName(""); setQuantity("1"); setUnit("svgs");
     setAdded(true); setTimeout(() => setAdded(false), 2200);
   };
 
@@ -685,9 +688,15 @@ function AddItemForm({ userName, onAdd, eventName, mealType }) {
       <div style={{ display: "grid", gridTemplateColumns: "1fr auto", gap: "0 0.8rem", alignItems: "end" }}>
         <Input label="Dish / Item" value={itemName} onChange={setItemName} placeholder="e.g. Potato Salad" />
         <div style={{ marginBottom: "1rem" }}>
-          <FieldLabel>Qty</FieldLabel>
-          <input type="number" min="1" max="99" value={quantity} onChange={(e) => setQuantity(e.target.value)}
-            style={{ width: 70, padding: "0.6rem", borderRadius: 10, border: "1.5px solid #ffccbc", fontFamily: "'Nunito', sans-serif", fontSize: "0.95rem", outline: "none", background: "rgba(255,248,244,0.9)", color: "#4e342e", textAlign: "center" }} />
+          <FieldLabel>Qty &amp; Unit</FieldLabel>
+          <div style={{ display: "flex", gap: "0.35rem", alignItems: "center" }}>
+            <input type="number" min="1" max="99" value={quantity} onChange={(e) => setQuantity(e.target.value)}
+              style={{ width: 56, padding: "0.6rem", borderRadius: 10, border: "1.5px solid #ffccbc", fontFamily: "'Nunito', sans-serif", fontSize: "0.95rem", outline: "none", background: "rgba(255,248,244,0.9)", color: "#4e342e", textAlign: "center" }} />
+            <select value={unit} onChange={(e) => setUnit(e.target.value)}
+              style={{ padding: "0.6rem 0.4rem", borderRadius: 10, border: "1.5px solid #ffccbc", fontFamily: "'Nunito', sans-serif", fontSize: "0.88rem", outline: "none", background: "rgba(255,248,244,0.9)", color: "#4e342e", cursor: "pointer" }}>
+              {UNIT_OPTIONS.map((u) => <option key={u} value={u}>{u}</option>)}
+            </select>
+          </div>
         </div>
       </div>
       <Button onClick={handleAdd} disabled={!itemName.trim()} variant="green" style={{ width: "100%" }}>
@@ -719,6 +728,7 @@ function ItemList({ items, onDeleteItem, onUpdateQty }) {
               <button style={qtyBtn} onClick={() => onUpdateQty(item.id, item.quantity - 1)}>−</button>
               <span style={{ fontFamily: "'Fredoka One', cursive", color: "#8d6e63", fontSize: "0.9rem", minWidth: 20, textAlign: "center" }}>{item.quantity}</span>
               <button style={qtyBtn} onClick={() => onUpdateQty(item.id, item.quantity + 1)}>+</button>
+              {item.unit && <span style={{ fontFamily: "'Nunito', sans-serif", color: "#a1887f", fontSize: "0.75rem", marginLeft: 2 }}>{item.unit}</span>}
             </div>
             <button onClick={() => onDeleteItem(item.id)} style={{ background: "transparent", border: "none", cursor: "pointer", fontSize: "1.1rem", opacity: 0.6, padding: "0 2px", flexShrink: 0 }}>🗑️</button>
           </div>
@@ -907,7 +917,7 @@ export default function App() {
 
   const handleAddItem = useCallback(async (eventId, item, bringer) => {
     try {
-      const newItem = { id: generateId(), itemName: item.itemName, quantity: item.quantity, bringerName: bringer, emoji: getFoodEmoji(item.itemName), addedAt: Date.now() };
+      const newItem = { id: generateId(), itemName: item.itemName, quantity: item.quantity, unit: item.unit || "svgs", bringerName: bringer, emoji: getFoodEmoji(item.itemName), addedAt: Date.now() };
       const itemsRef = ref(db, `events/${eventId}/items`);
       const snap = await get(itemsRef);
       const current = snap.val() || [];
