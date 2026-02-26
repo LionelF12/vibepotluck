@@ -740,11 +740,14 @@ function ItemList({ items, onDeleteItem, onUpdateQty }) {
 }
 
 // ── Event Screen ──────────────────────────────────────────────────────────────
-function EventScreen({ event, userName, onAddItem, onDeleteItem, onUpdateItemQty, onAddGuest, onRemoveGuest, onBack }) {
-  const [shareOpen, setShareOpen] = useState(false);
-  const [guestOpen, setGuestOpen] = useState(false);
-  const [newGuest, setNewGuest]   = useState("");
-  const [copied, setCopied]       = useState(false);
+function EventScreen({ event, userName, onAddItem, onDeleteItem, onUpdateItemQty, onAddGuest, onRemoveGuest, onUpdateLocation, onBack }) {
+  const [shareOpen, setShareOpen]       = useState(false);
+  const [guestOpen, setGuestOpen]       = useState(false);
+  const [newGuest, setNewGuest]         = useState("");
+  const [copied, setCopied]             = useState(false);
+  const [editingLoc, setEditingLoc]     = useState(false);
+  const [locationDraft, setLocationDraft] = useState(event.location || "");
+  const isHost = userName === event.createdBy;
   const shareUrl = `${window.location.href.split("?")[0].replace(/\/index\.html$/, "")}?event=${event.id}`;
   const theme    = getTableTheme(event.name, event.mealType);
 
@@ -765,11 +768,30 @@ function EventScreen({ event, userName, onAddItem, onDeleteItem, onUpdateItemQty
             <h2 style={{ fontFamily: "'Fredoka One', cursive", color: "#5d4e37", marginTop: 0, fontSize: "clamp(1.45rem, 5vw, 1.9rem)" }}>🎊 {event.name}</h2>
             {mealLabel && <p style={{ fontFamily: "'Nunito', sans-serif", color: "#5d4e37", margin: "4px 0", fontSize: "1rem" }}>🍴 {mealLabel}</p>}
             <p style={{ fontFamily: "'Nunito', sans-serif", color: "#5d4e37", margin: "4px 0", fontSize: "1rem" }}>📅 {fmtDate(event.date)} at {fmtTime(event.time)}</p>
-            <p style={{ fontFamily: "'Nunito', sans-serif", color: "#5d4e37", margin: "4px 0", fontSize: "1rem" }}>
+            <p style={{ fontFamily: "'Nunito', sans-serif", color: "#5d4e37", margin: "4px 0", fontSize: "1rem", display: "flex", alignItems: "center", flexWrap: "wrap", gap: "0.35rem" }}>
               📍{" "}
-              {event.location ? (
-                <a href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(event.location)}`} target="_blank" rel="noopener noreferrer" style={{ color: "#ff6a00", textDecoration: "underline", fontFamily: "'Nunito', sans-serif" }}>{event.location}</a>
-              ) : event.location}
+              {editingLoc ? (
+                <>
+                  <input
+                    value={locationDraft}
+                    onChange={(e) => setLocationDraft(e.target.value)}
+                    onKeyDown={(e) => { if (e.key === "Enter" && locationDraft.trim()) { onUpdateLocation(locationDraft.trim()); setEditingLoc(false); } if (e.key === "Escape") setEditingLoc(false); }}
+                    autoFocus
+                    style={{ fontFamily: "'Nunito', sans-serif", fontSize: "0.95rem", padding: "0.25rem 0.5rem", borderRadius: 8, border: "1.5px solid #ffb74d", outline: "none", color: "#4e342e", background: "rgba(255,248,244,0.95)", minWidth: 160 }}
+                  />
+                  <button onClick={() => { if (locationDraft.trim()) { onUpdateLocation(locationDraft.trim()); } setEditingLoc(false); }} style={{ border: "none", borderRadius: 7, padding: "0.2rem 0.6rem", cursor: "pointer", fontFamily: "'Fredoka One', cursive", fontSize: "0.8rem", background: "#ff6a00", color: "#fff" }}>Save</button>
+                  <button onClick={() => { setLocationDraft(event.location || ""); setEditingLoc(false); }} style={{ border: "1.5px solid #ffccbc", borderRadius: 7, padding: "0.2rem 0.6rem", cursor: "pointer", fontFamily: "'Fredoka One', cursive", fontSize: "0.8rem", background: "transparent", color: "#8d6e63" }}>Cancel</button>
+                </>
+              ) : (
+                <>
+                  {event.location ? (
+                    <a href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(event.location)}`} target="_blank" rel="noopener noreferrer" style={{ color: "#ff6a00", textDecoration: "underline", fontFamily: "'Nunito', sans-serif" }}>{event.location}</a>
+                  ) : <span style={{ color: "#bcaaa4", fontStyle: "italic" }}>No location set</span>}
+                  {isHost && (
+                    <button onClick={() => { setLocationDraft(event.location || ""); setEditingLoc(true); }} title="Edit location" style={{ border: "none", background: "transparent", cursor: "pointer", color: "#bcaaa4", fontSize: "0.85rem", padding: "0 2px", lineHeight: 1 }}>✏️</button>
+                  )}
+                </>
+              )}
             </p>
             <p style={{ fontFamily: "'Nunito', sans-serif", color: "#5d4e37", margin: "4px 0", fontSize: "1rem" }}>👥 {event.attendees} guests</p>
           </div>
@@ -941,6 +963,15 @@ export default function App() {
     }
   }, []);
 
+  const handleUpdateLocation = useCallback(async (eventId, newLocation) => {
+    try {
+      await set(ref(db, `events/${eventId}/location`), newLocation.trim());
+    } catch (err) {
+      console.error("Failed to update location:", err);
+      alert("Could not update location — check your connection and try again.");
+    }
+  }, []);
+
   const handleUpdateItemQty = useCallback(async (eventId, itemId, newQty) => {
     try {
       const itemsRef = ref(db, `events/${eventId}/items`);
@@ -1027,7 +1058,7 @@ export default function App() {
           {screen === "create" && <CreateEventScreen userName={userName} onCreate={handleCreateEvent} onBack={() => setScreen("home")} />}
           {screen === "history" && <HistoryScreen userName={historyUser} userMap={userMap} onDelete={handleDeleteEvent} onOpen={(id) => { setCurrentEventId(id); setScreen("event"); }} onBack={() => setScreen("home")} />}
           {screen === "event" && currentEventId && currentEvent && (
-            <EventScreen event={currentEvent} userName={userName} onAddItem={handleAddItem} onDeleteItem={handleDeleteItem} onUpdateItemQty={handleUpdateItemQty} onAddGuest={(name) => handleAddGuest(currentEventId, name)} onRemoveGuest={(guestId) => handleRemoveGuest(currentEventId, guestId)} onBack={() => setScreen("home")} />
+            <EventScreen event={currentEvent} userName={userName} onAddItem={handleAddItem} onDeleteItem={handleDeleteItem} onUpdateItemQty={handleUpdateItemQty} onAddGuest={(name) => handleAddGuest(currentEventId, name)} onRemoveGuest={(guestId) => handleRemoveGuest(currentEventId, guestId)} onUpdateLocation={(loc) => handleUpdateLocation(currentEventId, loc)} onBack={() => setScreen("home")} />
           )}
           {screen === "event" && currentEventId && !currentEvent && (
             <div style={{ textAlign: "center", paddingTop: "5rem", fontFamily: "'Fredoka One', cursive", color: "#5d4e37", fontSize: "1.6rem" }}>🍽️ Loading event…</div>
