@@ -715,7 +715,7 @@ function ItemList({ items, onDeleteItem, onUpdateQty }) {
     <Card style={{ marginTop: "1.2rem" }}>
       <h3 style={{ fontFamily: "'Fredoka One', cursive", color: "#e64a19", marginTop: 0, fontSize: "1.2rem" }}>📋 Who's Bringing What</h3>
       <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
-        {items.map((item) => {
+        {[...items].sort((a, b) => a.itemName.localeCompare(b.itemName)).map((item) => {
           const cat = getFoodCategory(item.itemName);
           return (
           <div key={item.id} style={{ display: "flex", alignItems: "center", gap: "0.6rem", background: cat.bg, borderRadius: 12, padding: "0.55rem 0.9rem", border: `2px solid ${cat.color}` }}>
@@ -781,6 +781,9 @@ function EventScreen({ event, userName, onAddItem, onDeleteItem, onUpdateItemQty
                   />
                   <button onClick={() => { if (locationDraft.trim()) { onUpdateLocation(locationDraft.trim()); } setEditingLoc(false); }} style={{ border: "none", borderRadius: 7, padding: "0.2rem 0.6rem", cursor: "pointer", fontFamily: "'Fredoka One', cursive", fontSize: "0.8rem", background: "#ff6a00", color: "#fff" }}>Save</button>
                   <button onClick={() => { setLocationDraft(event.location || ""); setEditingLoc(false); }} style={{ border: "1.5px solid #ffccbc", borderRadius: 7, padding: "0.2rem 0.6rem", cursor: "pointer", fontFamily: "'Fredoka One', cursive", fontSize: "0.8rem", background: "transparent", color: "#8d6e63" }}>Cancel</button>
+                  {locationDraft.trim() && (
+                    <a href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(locationDraft.trim())}`} target="_blank" rel="noopener noreferrer" style={{ fontSize: "0.78rem", color: "#ff6a00", fontFamily: "'Nunito', sans-serif", textDecoration: "none", whiteSpace: "nowrap" }}>📍 Preview ↗</a>
+                  )}
                 </>
               ) : (
                 <>
