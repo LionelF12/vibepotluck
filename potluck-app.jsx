@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import homeBg from "./src/homebackground.png";
-import { db } from "./src/firebase.js";
+import { db, auth, GoogleAuthProvider, signInWithPopup, signInAnonymously, onAuthStateChanged } from "./src/firebase.js";
 import { ref, set, get, onValue, remove } from "firebase/database";
 
 // ── Mobile hook ───────────────────────────────────────────────────────────────
@@ -436,7 +436,6 @@ function Mascot({ size = 130, style = {} }) {
 // ── Home Screen ───────────────────────────────────────────────────────────────
 function HomeScreen({ onCreateEvent, onJoinEvent, onViewHistory, initialJoinCode = "" }) {
   const isMobile = useIsMobile();
-  const [name, setName]         = useState("");
   const [joinName, setJoinName] = useState("");
   const [code, setCode]         = useState(initialJoinCode);
   const [histName, setHistName] = useState("");
@@ -455,8 +454,8 @@ function HomeScreen({ onCreateEvent, onJoinEvent, onViewHistory, initialJoinCode
       <div style={{ display: "flex", flexDirection: "row", gap: "1rem", flexWrap: "wrap", justifyContent: "center" }}>
         <Card style={{ flex: "1 1 min(300px, 100%)", maxWidth: "400px", padding: isMobile ? "1.25rem" : "2rem" }}>
           <h2 style={{ fontFamily: "'Fredoka One', cursive", fontStyle: "italic", color: "#d84315", marginTop: 0, fontSize: "1.4rem" }}>🎊 Host a Potluck</h2>
-        <Input value={name} onChange={setName} placeholder="Your name, e.g. Grandma Sue" required />
-        <Button onClick={() => name.trim() && onCreateEvent(name.trim())} disabled={!name.trim()} style={{ width: "100%" }}>🎊 Create a New Event</Button>
+          <p style={{ fontFamily: "'Nunito', sans-serif", fontStyle: "italic", color: "#5d4e37", fontSize: "0.9rem", margin: "0 0 0.75rem" }}>Hosts sign in with Google; guests just need a name.</p>
+        <Button onClick={onCreateEvent} style={{ width: "100%" }}>🎊 Create a New Event</Button>
       </Card>
       <Card style={{ flex: "1 1 min(300px, 100%)", maxWidth: "400px", padding: isMobile ? "1.25rem" : "2rem" }}>
         <h2 style={{ fontFamily: "'Fredoka One', cursive", fontStyle: "italic", color: "#d84315", marginTop: 0, fontSize: "1.4rem" }}>🔗 Join an Existing Event</h2>
@@ -760,14 +759,14 @@ function ItemList({ items, onDeleteItem, onUpdateQty }) {
 }
 
 // ── Event Screen ──────────────────────────────────────────────────────────────
-function EventScreen({ event, userName, onAddItem, onDeleteItem, onUpdateItemQty, onAddGuest, onRemoveGuest, onUpdateLocation, onBack }) {
+function EventScreen({ event, userName, currentUid, onAddItem, onDeleteItem, onUpdateItemQty, onAddGuest, onRemoveGuest, onUpdateLocation, onBack }) {
   const [shareOpen, setShareOpen]       = useState(false);
   const [guestOpen, setGuestOpen]       = useState(false);
   const [newGuest, setNewGuest]         = useState("");
   const [copied, setCopied]             = useState(false);
   const [editingLoc, setEditingLoc]     = useState(false);
   const [locationDraft, setLocationDraft] = useState(event.location || "");
-  const isHost = userName === event.createdBy;
+  const isHost = currentUid && event.createdByUid && currentUid === event.createdByUid;
   const shareUrl = `${window.location.href.split("?")[0].replace(/\/index\.html$/, "")}?event=${event.id}`;
   const theme    = getTableTheme(event.name, event.mealType);
 
@@ -891,6 +890,25 @@ export default function App() {
   const [userName, setUserName]             = useState("");
   const [historyUser, setHistoryUser]       = useState("");
   const [scrollY, setScrollY]               = useState(0);
+  const [currentUid, setCurrentUid]         = useState(null);
+
+  // Restore Firebase Auth session on mount
+  useEffect(() => {
+    return onAuthStateChanged(auth, (user) => {
+      if (user) setCurrentUid(user.uid);
+    });
+  }, []);
+
+  const signInWithGoogle = useCallback(async () => {
+    const result = await signInWithPopup(auth, new GoogleAuthProvider());
+    setCurrentUid(result.user.uid);
+    return result.user;
+  }, []);
+
+  const signInAnon = useCallback(async () => {
+    const result = await signInAnonymously(auth);
+    setCurrentUid(result.user.uid);
+  }, []);
 
   // Check URL for ?event=ID on mount
   useEffect(() => {
@@ -926,7 +944,7 @@ export default function App() {
   const handleCreateEvent = useCallback(async (form) => {
     try {
       const id = generateId();
-      const newEvent = { id, ...form, createdBy: userName, items: [], guests: [{ id: generateId(), name: userName, joinedAt: Date.now() }], createdAt: Date.now() };
+      const newEvent = { id, ...form, createdBy: userName, createdByUid: currentUid, items: [], guests: [{ id: generateId(), name: userName, joinedAt: Date.now() }], createdAt: Date.now() };
       await set(ref(db, `events/${id}`), newEvent);
       registerUserEvent(userName, id);
       setCurrentEventId(id);
@@ -935,10 +953,11 @@ export default function App() {
       console.error("Failed to create event:", err);
       alert("Could not create event — check your internet connection and try again.\n\nIf this is a Vercel deployment, make sure the Firebase environment variables are set in the Vercel dashboard.");
     }
-  }, [userName, registerUserEvent]);
+  }, [userName, currentUid, registerUserEvent]);
 
   const handleJoinEvent = useCallback(async (id, name) => {
     try {
+      if (!currentUid) await signInAnon();
       setUserName(name);
       const snap = await get(ref(db, `events/${id}`));
       if (snap.exists()) {
@@ -958,7 +977,7 @@ export default function App() {
       console.error("Failed to join event:", err);
       alert("Could not connect to the event — check your internet connection and try again.");
     }
-  }, [registerUserEvent]);
+  }, [currentUid, signInAnon, registerUserEvent]);
 
   const handleAddItem = useCallback(async (eventId, item, bringer) => {
     try {
@@ -1076,12 +1095,12 @@ export default function App() {
         )}
         <div style={{ padding: isMobile ? "1rem" : "2rem", maxWidth: "800px", margin: "0 auto" }}>
           {(screen === "home" || screen === "event-join") && (
-            <HomeScreen onCreateEvent={(n) => { setUserName(n); setScreen("create"); }} onJoinEvent={handleJoinEvent} onViewHistory={(n) => { setHistoryUser(n); setUserName(n); setScreen("history"); }} initialJoinCode={screen === "event-join" ? (currentEventId || "") : ""} />
+            <HomeScreen onCreateEvent={async () => { const user = await signInWithGoogle(); setUserName(user.displayName || ""); setScreen("create"); }} onJoinEvent={handleJoinEvent} onViewHistory={(n) => { setHistoryUser(n); setUserName(n); setScreen("history"); }} initialJoinCode={screen === "event-join" ? (currentEventId || "") : ""} />
           )}
           {screen === "create" && <CreateEventScreen userName={userName} onCreate={handleCreateEvent} onBack={() => setScreen("home")} />}
           {screen === "history" && <HistoryScreen userName={historyUser} userMap={userMap} onDelete={handleDeleteEvent} onOpen={(id) => { setCurrentEventId(id); setScreen("event"); }} onBack={() => setScreen("home")} />}
           {screen === "event" && currentEventId && currentEvent && (
-            <EventScreen event={currentEvent} userName={userName} onAddItem={handleAddItem} onDeleteItem={handleDeleteItem} onUpdateItemQty={handleUpdateItemQty} onAddGuest={(name) => handleAddGuest(currentEventId, name)} onRemoveGuest={(guestId) => handleRemoveGuest(currentEventId, guestId)} onUpdateLocation={(loc) => handleUpdateLocation(currentEventId, loc)} onBack={() => setScreen("home")} />
+            <EventScreen event={currentEvent} userName={userName} currentUid={currentUid} onAddItem={handleAddItem} onDeleteItem={handleDeleteItem} onUpdateItemQty={handleUpdateItemQty} onAddGuest={(name) => handleAddGuest(currentEventId, name)} onRemoveGuest={(guestId) => handleRemoveGuest(currentEventId, guestId)} onUpdateLocation={(loc) => handleUpdateLocation(currentEventId, loc)} onBack={() => setScreen("home")} />
           )}
           {screen === "event" && currentEventId && !currentEvent && (
             <div style={{ textAlign: "center", paddingTop: "5rem", fontFamily: "'Fredoka One', cursive", color: "#5d4e37", fontSize: "1.6rem" }}>🍽️ Loading event…</div>
